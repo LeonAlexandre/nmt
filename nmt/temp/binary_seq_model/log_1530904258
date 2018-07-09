@@ -1,0 +1,14 @@
+# log_file=./nmt/temp/binary_seq_model\log_1530904258
+# Start step 0, lr 1, Fri Jul  6 12:11:02 2018
+  step 100 lr 1 step-time 0.21s wps 23.31K ppl 3.35 gN 9.39 edit_distance 0.00, Fri Jul  6 12:11:23 2018
+  step 200 lr 1 step-time 0.20s wps 24.86K ppl 4.93 gN 51.65 edit_distance 0.00, Fri Jul  6 12:11:43 2018
+  step 300 lr 1 step-time 0.20s wps 25.20K ppl 2.26 gN 1.59 edit_distance 0.00, Fri Jul  6 12:12:03 2018
+  step 400 lr 1 step-time 0.20s wps 24.80K ppl 2.19 gN 1.48 edit_distance 0.00, Fri Jul  6 12:12:23 2018
+  step 500 lr 1 step-time 0.20s wps 25.12K ppl 2.17 gN 1.42 edit_distance 0.00, Fri Jul  6 12:12:43 2018
+  step 600 lr 1 step-time 0.19s wps 25.21K ppl 2.16 gN 1.38 edit_distance 0.00, Fri Jul  6 12:13:03 2018
+  step 700 lr 1 step-time 0.20s wps 24.96K ppl 2.15 gN 1.36 edit_distance 0.00, Fri Jul  6 12:13:23 2018
+  step 800 lr 1 step-time 0.20s wps 24.54K ppl 2.13 gN 1.34 edit_distance 0.00, Fri Jul  6 12:13:44 2018
+  step 900 lr 1 step-time 0.22s wps 22.70K ppl 2.13 gN 1.35 edit_distance 0.00, Fri Jul  6 12:14:06 2018
+  step 1000 lr 1 step-time 0.20s wps 25.18K ppl 2.11 gN 1.19 edit_distance 0.00, Fri Jul  6 12:14:25 2018
+# Final, step 1000 lr 1 step-time 0.20s wps 25.18K ppl 2.11 gN 1.19 dev ppl 2.08, dev edit_distance 13.0, test ppl 2.08, test edit_distance 12.9, Fri Jul  6 12:14:35 2018
+# Best edit_distance, step 1000 lr 1 step-time 0.20s wps 25.18K ppl 2.11 gN 1.19 dev ppl 2.08, dev edit_distance 13.0, test ppl 2.08, test edit_distance 12.9, Fri Jul  6 12:14:41 2018

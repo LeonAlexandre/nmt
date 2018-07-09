@@ -1,0 +1,6 @@
+# log_file=./nmt/temp/nmt_attention_model\log_1530667341
+# Start step 0, lr 1, Tue Jul  3 18:22:38 2018
+  step 100 lr 1 step-time 1.78s wps 3.11K ppl 17598.27 gN 71.39 bleu 0.00, Tue Jul  3 18:25:36 2018
+  step 200 lr 1 step-time 1.79s wps 3.17K ppl 1377.88 gN 33.66 bleu 0.00, Tue Jul  3 18:28:35 2018
+# Final, step 200 lr 1 step-time 1.79s wps 3.17K ppl 1377.88 gN 33.66 dev ppl 832.57, dev bleu 0.0, test ppl 1067.73, test bleu 0.0, Tue Jul  3 18:29:09 2018
+# Best bleu, step 0 lr 1 step-time 1.79s wps 3.17K ppl 1377.88 gN 33.66 dev ppl 17194.73, dev bleu 0.0, test ppl 17195.81, test bleu 0.0, Tue Jul  3 18:29:31 2018

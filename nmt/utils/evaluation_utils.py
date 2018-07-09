@@ -24,6 +24,10 @@ import tensorflow as tf
 from ..scripts import bleu
 from ..scripts import rouge
 
+from ..utils import misc_utils as utils
+
+import Levenshtein as lv
+
 
 __all__ = ["evaluate"]
 
@@ -42,6 +46,8 @@ def evaluate(ref_file, trans_file, metric, subword_option=None):
     evaluation_score = _accuracy(ref_file, trans_file)
   elif metric.lower() == "word_accuracy":
     evaluation_score = _word_accuracy(ref_file, trans_file)
+  elif metric.lower() == "edit_distance":
+    evaluation_score = _edit_distance(ref_file, trans_file)
   else:
     raise ValueError("Unknown metric %s" % metric)
 
@@ -62,6 +68,48 @@ def _clean(sentence, subword_option):
 
   return sentence
 
+
+def _edit_distance(ref_file, predict_file):
+    with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file,"rb")) as ref_fh:
+        with codecs.getreader("utf-8")(tf.gfile.GFile(predict_file,"rb")) as predict_fh:
+            ed_dis = 0
+            #num_lines_pred = sum(1 for line in predict_fh)
+            num_lines = sum(1 for line in ref_fh)
+            #print(num_lines)
+            ref_fh.seek(0)
+            for (ref_line, predict_line) in zip(ref_fh, predict_fh):
+                ref_line = ref_line.strip()
+                predict_line = predict_line.strip()
+                ref_line = ref_line.replace(" ","")
+                predict_line = predict_line.replace(" ","")
+                ed_dis += lv.distance(ref_line,predict_line)
+                #print("Label: " + ref_line)
+                #print("Prediction: " + predict_line)
+          
+    
+    """
+    with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file, "rb")) as ref_fh:
+        with codecs.getreader("utf-8")(tf.gfile.GFile(pred_file, "rb")) as pred_fh:
+            ed_dis = 0
+            num_lines_pred = sum(1 for line in pred_fh)
+            num_lines = sum(1 for line in ref_fh)
+            print("Num lines ref: " + str(num_lines))
+            print("Num lines pred: " + str(num_lines_pred))
+            
+            ref_fh.seek(0)
+            pred_fh.seek(0)
+            
+            for ref in ref_fh:
+                #print("Entered the loop")
+                ref = ref.strip()
+                pred = pred_fh.readline().strip()
+                ed_dis += lv.distance(ref,pred)
+    """
+    avg = -1 * ed_dis / num_lines
+    
+    return avg
+        
+        
 
 # Follow //transconsole/localization/machine_translation/metrics/bleu_calc.py
 def _bleu(ref_file, trans_file, subword_option=None):

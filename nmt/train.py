@@ -21,6 +21,7 @@ import random
 import time
 
 import tensorflow as tf
+import numpy as np
 
 from . import attention_model
 from . import gnmt_model
@@ -354,18 +355,16 @@ def train(hparams, scope=None, target_session=""):
     except tf.errors.OutOfRangeError:
       # Finished going through the training dataset.  Go to next epoch.
       hparams.epoch_step = 0
-      utils.print_out(
-          "# Finished an epoch, step %d. Perform external evaluation" %
-          global_step)
-      run_sample_decode(infer_model, infer_sess, model_dir, hparams,
-                        summary_writer, sample_src_data, sample_tgt_data)
-      run_external_eval(infer_model, infer_sess, model_dir, hparams,
-                        summary_writer)
+      #utils.print_out("# Finished an epoch, step %d. Perform external evaluation" % global_step)
+      utils.print_out("# Finished an epoch, step %d. " % global_step)
+      """
+      run_sample_decode(infer_model, infer_sess, model_dir, hparams, summary_writer, sample_src_data, sample_tgt_data)
+      run_external_eval(infer_model, infer_sess, model_dir, hparams, summary_writer)
 
       if avg_ckpts:
         run_avg_external_eval(infer_model, infer_sess, model_dir, hparams,
                               summary_writer, global_step)
-
+      """
       train_sess.run(
           train_model.iterator.initializer,
           feed_dict={train_model.skip_count_placeholder: 0})
@@ -476,9 +475,9 @@ def _format_results(name, ppl, scores, metrics):
   if scores:
     for metric in metrics:
       if result_str:
-        result_str += ", %s %s %.1f" % (name, metric, scores[metric])
+        result_str += ", %s %s %.1f" % (name, metric, np.abs(scores[metric]))
       else:
-        result_str = "%s %s %.1f" % (name, metric, scores[metric])
+        result_str = "%s %s %.1f" % (name, metric, np.abs(scores[metric]))
   return result_str
 
 
@@ -486,7 +485,7 @@ def _get_best_results(hparams):
   """Summary of the current best results."""
   tokens = []
   for metric in hparams.metrics:
-    tokens.append("%s %.2f" % (metric, getattr(hparams, "best_" + metric)))
+    tokens.append("%s %.2f" % (metric, np.abs(getattr(hparams, "best_" + metric))))
   return ", ".join(tokens)
 
 
@@ -537,7 +536,7 @@ def _external_eval(model, global_step, sess, hparams, iterator,
                    save_on_best, avg_ckpts=False):
   """External evaluation such as BLEU and ROUGE scores."""
   out_dir = hparams.out_dir
-  decode = global_step > 0
+  decode = global_step >= 0
 
   if avg_ckpts:
     label = "avg_" + label

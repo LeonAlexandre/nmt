@@ -119,7 +119,7 @@ def add_arguments(parser):
       """)
 
   parser.add_argument(
-      "--num_train_steps", type=int, default=12000, help="Num steps to train.")
+      "--num_train_steps", type=int, default=300, help="Num steps to train.")
   parser.add_argument("--colocate_gradients_with_ops", type="bool", nargs="?",
                       const=True,
                       default=True,
@@ -478,7 +478,10 @@ def extend_hparams(hparams):
 
   # Evaluation
   for metric in hparams.metrics:
-    hparams.add_hparam("best_" + metric, 0)  # larger is better
+    if metric == "edit_distance":
+      hparams.add_hparam("best_" + metric, -1*10*hparams.src_max_len)  # Smaller is better, try to maximize the negative edit_distance
+    else:
+      hparams.add_hparam("best_" + metric, 0)  # larger is better
     best_metric_dir = os.path.join(hparams.out_dir, "best_" + metric)
     hparams.add_hparam("best_" + metric + "_dir", best_metric_dir)
     tf.gfile.MakeDirs(best_metric_dir)
