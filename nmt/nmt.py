@@ -42,7 +42,7 @@ def add_arguments(parser):
 
   # network
   parser.add_argument("--num_units", type=int, default=32, help="Network size.")
-  parser.add_argument("--num_layers", type=int, default=None,
+  parser.add_argument("--num_layers", type=int, default=2,
                       help="Network depth.")
   parser.add_argument("--num_encoder_layers", type=int, default=None,
                       help="Encoder depth, equal to num_layers if None.")
@@ -558,6 +558,7 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
 
   ## Train / Decode
   out_dir = flags.out_dir
+  print(flags.out_dir)
   if not tf.gfile.Exists(out_dir): tf.gfile.MakeDirs(out_dir)
 
   # Load hparams.
