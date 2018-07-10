@@ -1,0 +1,12 @@
+# log_file=./nmt/temp/binary_seq_model_short_uni2/log_1531249888
+# Start step 0, lr 1, Tue Jul 10 19:11:33 2018
+  step 100 lr 1 step-time 0.14s wps 11.63K ppl 3.24 gN 3.55 edit_distance 17.19, Tue Jul 10 19:11:48 2018
+  step 200 lr 1 step-time 0.12s wps 13.30K ppl 2.40 gN 1.61 edit_distance 9.57, Tue Jul 10 19:12:04 2018
+  step 300 lr 1 step-time 0.13s wps 13.18K ppl 2.13 gN 1.48 edit_distance 4.08, Tue Jul 10 19:12:20 2018
+  step 400 lr 1 step-time 0.13s wps 13.10K ppl 1.94 gN 1.17 edit_distance 3.33, Tue Jul 10 19:12:35 2018
+  step 500 lr 1 step-time 0.12s wps 13.35K ppl 1.75 gN 0.56 edit_distance 2.77, Tue Jul 10 19:12:51 2018
+  step 600 lr 1 step-time 0.12s wps 13.57K ppl 1.73 gN 0.52 edit_distance 2.72, Tue Jul 10 19:13:06 2018
+  step 700 lr 1 step-time 0.12s wps 13.45K ppl 1.72 gN 0.50 edit_distance 2.68, Tue Jul 10 19:13:21 2018
+  step 800 lr 1 step-time 0.13s wps 12.79K ppl 1.71 gN 0.53 edit_distance 2.55, Tue Jul 10 19:13:37 2018
+  step 900 lr 1 step-time 0.12s wps 13.28K ppl 1.70 gN 0.50 edit_distance 2.55, Tue Jul 10 19:13:53 2018
+  step 1000 lr 1 step-time 0.12s wps 13.24K ppl 1.70 gN 0.50 edit_distance 2.55, Tue Jul 10 19:14:09 2018
