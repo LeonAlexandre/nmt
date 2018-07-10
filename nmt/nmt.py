@@ -42,7 +42,7 @@ def add_arguments(parser):
 
   # network
   parser.add_argument("--num_units", type=int, default=32, help="Network size.")
-  parser.add_argument("--num_layers", type=int, default=2,
+  parser.add_argument("--num_layers", type=int, default=None,
                       help="Network depth.")
   parser.add_argument("--num_encoder_layers", type=int, default=None,
                       help="Encoder depth, equal to num_layers if None.")
