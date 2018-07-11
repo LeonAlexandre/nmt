@@ -1,0 +1,4 @@
+# log_file=./nmt/temp/seq25_5k_model_uni3/log_1531332917
+# Start step 10000, lr 1, Wed Jul 11 18:15:22 2018
+# Final, step 10000 lr 1 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.95, dev edit_distance 9.8, test ppl 1.95, test edit_distance 9.7, Wed Jul 11 18:15:26 2018
+# Best edit_distance, step 9500 lr 1 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.95, dev edit_distance 9.0, test ppl 1.95, test edit_distance 9.0, Wed Jul 11 18:15:30 2018
