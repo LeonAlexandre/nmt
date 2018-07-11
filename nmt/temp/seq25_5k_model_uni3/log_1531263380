@@ -1,5 +1,0 @@
-# log_file=./nmt/temp/seq25_5k_model_uni3/log_1531263380
-# Start step 0, lr 1, Tue Jul 10 22:56:27 2018
-  step 100 lr 1 step-time 0.39s wps 12.33K ppl 3.99 gN 112.08 edit_distance 34.51, Tue Jul 10 22:57:07 2018
-  step 200 lr 1 step-time 0.37s wps 13.02K ppl 2.29 gN 1.75 edit_distance 34.51, Tue Jul 10 22:57:44 2018
-  step 300 lr 1 step-time 0.37s wps 13.12K ppl 2.22 gN 1.70 edit_distance 34.51, Tue Jul 10 22:58:20 2018
