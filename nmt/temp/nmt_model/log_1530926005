@@ -1,7 +1,0 @@
-# log_file=./nmt/temp/nmt_model\log_1530926005
-# Start step 0, lr 1, Fri Jul  6 18:13:43 2018
-  step 100 lr 1 step-time 1.73s wps 3.24K ppl 1576.39 gN 13.90 edit_distance 0.00, Fri Jul  6 18:16:36 2018
-  step 200 lr 1 step-time 1.60s wps 3.48K ppl 538.39 gN 5.76 edit_distance 0.00, Fri Jul  6 18:20:38 2018
-  step 300 lr 1 step-time 1.65s wps 3.44K ppl 350.43 gN 4.77 edit_distance 0.00, Fri Jul  6 18:23:36 2018
-# Final, step 300 lr 1 step-time 1.65s wps 3.44K ppl 350.43 gN 4.77 dev ppl 215.82, dev edit_distance -58.6, test ppl 241.25, test edit_distance -67.5, Fri Jul  6 18:25:02 2018
-# Best edit_distance, step 0 lr 1 step-time 1.65s wps 3.44K ppl 350.43 gN 4.77 dev ppl 17189.73, dev edit_distance -58.6, test ppl 17187.19, test edit_distance -67.5, Fri Jul  6 18:25:20 2018
