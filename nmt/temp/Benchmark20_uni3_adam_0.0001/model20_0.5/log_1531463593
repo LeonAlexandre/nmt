@@ -1,0 +1,9 @@
+# log_file=./nmt/temp/Benchmark20_uni3_adam_0.0001/model20_0.5/log_1531463593
+# Start step 0, lr 0.0001, Fri Jul 13 06:33:19 2018
+  step 100 lr 0.0001 step-time 0.20s wps 19.51K ppl 3.05 gN 8.77 edit_distance 40.14, Fri Jul 13 06:33:38 2018
+  step 200 lr 0.0001 step-time 0.18s wps 21.13K ppl 2.08 gN 8.99 edit_distance 40.14, Fri Jul 13 06:33:57 2018
+  step 300 lr 0.0001 step-time 0.18s wps 21.10K ppl 2.00 gN 12.46 edit_distance 40.14, Fri Jul 13 06:34:15 2018
+  step 400 lr 0.0001 step-time 0.18s wps 21.20K ppl 1.98 gN 14.80 edit_distance 40.14, Fri Jul 13 06:34:34 2018
+  step 500 lr 0.0001 step-time 0.18s wps 21.43K ppl 1.96 gN 14.14 edit_distance 40.14, Fri Jul 13 06:34:52 2018
+  step 600 lr 0.0001 step-time 0.18s wps 21.15K ppl 1.95 gN 11.22 edit_distance 9.55, Fri Jul 13 06:35:13 2018
+  step 700 lr 0.0001 step-time 0.19s wps 20.90K ppl 1.93 gN 12.68 edit_distance 9.55, Fri Jul 13 06:35:31 2018
