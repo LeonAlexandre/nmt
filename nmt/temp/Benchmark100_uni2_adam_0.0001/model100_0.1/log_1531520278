@@ -1,0 +1,22 @@
+# log_file=./nmt/temp/Benchmark100_uni2_adam_0.0001/model100_0.1/log_1531520278
+# Start step 22500, lr 0.0001, Fri Jul 13 22:18:09 2018
+  step 22600 lr 0.0001 step-time 0.65s wps 36.93K ppl 1.78 gN 225.94 edit_distance 24.47, Fri Jul 13 22:19:14 2018
+  step 22700 lr 0.0001 step-time 0.64s wps 37.44K ppl 1.78 gN 1014.56 edit_distance 24.47, Fri Jul 13 22:20:17 2018
+  step 22800 lr 0.0001 step-time 0.64s wps 37.31K ppl 1.78 gN 554.12 edit_distance 24.47, Fri Jul 13 22:21:21 2018
+  step 22900 lr 0.0001 step-time 0.65s wps 36.98K ppl 1.78 gN 166.35 edit_distance 24.47, Fri Jul 13 22:22:26 2018
+  step 23000 lr 0.0001 step-time 0.64s wps 37.26K ppl 1.78 gN 256.97 edit_distance 24.47, Fri Jul 13 22:23:30 2018
+  step 23100 lr 0.0001 step-time 0.64s wps 37.27K ppl 1.78 gN 233.66 edit_distance 24.42, Fri Jul 13 22:24:42 2018
+  step 23200 lr 0.0001 step-time 0.64s wps 37.24K ppl 1.78 gN 250.69 edit_distance 24.42, Fri Jul 13 22:25:46 2018
+  step 23300 lr 0.0001 step-time 0.64s wps 37.24K ppl 1.78 gN 299.65 edit_distance 24.42, Fri Jul 13 22:26:50 2018
+  step 23400 lr 0.0001 step-time 0.64s wps 37.11K ppl 1.77 gN 338.28 edit_distance 24.42, Fri Jul 13 22:27:54 2018
+  step 23500 lr 0.0001 step-time 0.65s wps 37.01K ppl 1.77 gN 202.13 edit_distance 24.42, Fri Jul 13 22:28:59 2018
+  step 23600 lr 0.0001 step-time 0.64s wps 37.16K ppl 1.78 gN 362.91 edit_distance 24.38, Fri Jul 13 22:30:14 2018
+  step 23700 lr 0.0001 step-time 0.64s wps 37.17K ppl 1.77 gN 352.49 edit_distance 24.38, Fri Jul 13 22:31:19 2018
+  step 23800 lr 0.0001 step-time 0.64s wps 37.14K ppl 1.77 gN 316.12 edit_distance 24.38, Fri Jul 13 22:32:23 2018
+  step 23900 lr 0.0001 step-time 0.64s wps 37.09K ppl 1.77 gN 164.62 edit_distance 24.38, Fri Jul 13 22:33:28 2018
+  step 24000 lr 0.0001 step-time 0.64s wps 37.07K ppl 1.77 gN 502.20 edit_distance 24.38, Fri Jul 13 22:34:32 2018
+  step 24100 lr 0.0001 step-time 0.65s wps 36.84K ppl 1.77 gN 256.83 edit_distance 24.24, Fri Jul 13 22:35:44 2018
+  step 24200 lr 0.0001 step-time 0.65s wps 36.80K ppl 1.77 gN 224.68 edit_distance 24.24, Fri Jul 13 22:36:49 2018
+  step 24300 lr 0.0001 step-time 0.65s wps 36.96K ppl 1.77 gN 857.24 edit_distance 24.24, Fri Jul 13 22:37:54 2018
+  step 24400 lr 0.0001 step-time 0.65s wps 37.00K ppl 1.77 gN 978.08 edit_distance 24.24, Fri Jul 13 22:38:58 2018
+  step 24500 lr 0.0001 step-time 0.64s wps 37.09K ppl 1.77 gN 669.48 edit_distance 24.24, Fri Jul 13 22:40:03 2018
