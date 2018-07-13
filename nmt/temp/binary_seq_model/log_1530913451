@@ -1,4 +1,0 @@
-# log_file=./nmt/temp/binary_seq_model\log_1530913451
-# Start step 12000, lr 1, Fri Jul  6 14:44:18 2018
-# Final, step 12000 lr 1 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.95, dev edit_distance 11.4, test ppl 1.95, test edit_distance 11.5, Fri Jul  6 14:44:24 2018
-# Best edit_distance, step 1000 lr 1 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 2.08, dev edit_distance 13.0, test ppl 2.08, test edit_distance 12.9, Fri Jul  6 14:44:31 2018

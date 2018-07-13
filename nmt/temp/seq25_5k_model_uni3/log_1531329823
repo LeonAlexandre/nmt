@@ -1,3 +1,0 @@
-# log_file=./nmt/temp/seq25_5k_model_uni3/log_1531329823
-# Start step 4500, lr 1, Wed Jul 11 17:23:49 2018
-  step 4600 lr 1 step-time 0.53s wps 9.11K ppl 2.03 gN 0.96 edit_distance 12.25, Wed Jul 11 17:24:42 2018

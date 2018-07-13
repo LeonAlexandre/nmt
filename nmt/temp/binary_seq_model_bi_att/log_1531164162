@@ -1,6 +1,0 @@
-# log_file=./nmt/temp/binary_seq_model_bi_att\log_1531164162
-# Start step 0, lr 1, Mon Jul  9 12:22:51 2018
-  step 100 lr 1 step-time 0.40s wps 12.32K ppl 136.89 gN 1037.07 edit_distance 25.00, Mon Jul  9 12:23:48 2018
-  step 200 lr 1 step-time 0.40s wps 12.38K ppl 31.94 gN 113.99 edit_distance 23.19, Mon Jul  9 12:24:35 2018
-  step 300 lr 1 step-time 0.38s wps 12.80K ppl 7.19 gN 286.89 edit_distance 23.19, Mon Jul  9 12:25:25 2018
-  step 400 lr 1 step-time 0.38s wps 12.82K ppl 2.48 gN 2.50 edit_distance 22.65, Mon Jul  9 12:26:16 2018
