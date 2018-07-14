@@ -233,7 +233,7 @@ def add_arguments(parser):
   parser.add_argument("--override_loaded_hparams", type="bool", nargs="?",
                       const=True, default=False,
                       help="Override loaded hparams with values specified")
-  parser.add_argument("--num_keep_ckpts", type=int, default=5,
+  parser.add_argument("--num_keep_ckpts", type=int, default=2,
                       help="Max number of checkpoints to keep.")
   parser.add_argument("--avg_ckpts", type="bool", nargs="?",
                       const=True, default=False, help=("""\
