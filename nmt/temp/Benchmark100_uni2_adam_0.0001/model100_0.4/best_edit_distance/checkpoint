@@ -1,2 +1,2 @@
-model_checkpoint_path: "translate.ckpt-37000"
-all_model_checkpoint_paths: "translate.ckpt-37000"
+model_checkpoint_path: "translate.ckpt-55500"
+all_model_checkpoint_paths: "translate.ckpt-55500"
