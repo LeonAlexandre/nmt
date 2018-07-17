@@ -28,6 +28,8 @@ from . import model_helper
 from .utils import iterator_utils
 from .utils import misc_utils as utils
 
+import Levenshtein as lv
+
 utils.check_tensorflow_version()
 
 __all__ = ["BaseModel", "Model"]
@@ -419,6 +421,8 @@ class BaseModel(object):
         #   10% improvements for small models & 20% for larger ones.
         # If memory is a concern, we should apply output_layer per timestep.
         logits = self.output_layer(outputs.rnn_output)
+        #logits = tf.Print(node1,[node1],"Logits from output layer: ",5,10)
+        
 
       ## Inference
       else:
@@ -498,9 +502,27 @@ class BaseModel(object):
   def _compute_loss(self, logits):
     """Compute optimization loss."""
     target_output = self.iterator.target_output
+    #print(target_output)
     if self.time_major:
       target_output = tf.transpose(target_output)
     max_time = self.get_max_time(target_output)
+    '''
+    sMax = tf.nn.softmax(logits)
+    maxInd = tf.argmax(logits,2)
+
+    edit_dis = 0
+    for (network_seq,target_seq) in zip(tf.split(maxInd,tf.to_int32(self.batch_size),0),tf.split(target_output,tf.to_int32(self.batch_size),0)):
+      edit_dis += lv.distance(network_seq,target_seq)
+
+    
+    maxInd = utils.dense_to_sparse(maxInd,100)
+    print("Network output is: " + str(maxInd))
+    target_output = utils.dense_to_sparse(target_output,100)
+    print("Target output is: " + str(target_output))
+    '''
+
+    #hardmax = tf.one_hot(maxInd,5)
+    #node1 = tf.Print(logits,[maxInd,target_output,num_seq,edit_dis],"Network vs target: ",5,20)
     crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=target_output, logits=logits)
     target_weights = tf.sequence_mask(
@@ -510,6 +532,9 @@ class BaseModel(object):
 
     loss = tf.reduce_sum(
         crossent * target_weights) / tf.to_float(self.batch_size)
+
+    #loss = tf.reduce_sum(
+    #  tf.edit_distance(maxInd,target_output))
     return loss
 
   def _get_infer_summary(self, hparams):
