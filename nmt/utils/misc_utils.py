@@ -181,15 +181,3 @@ def format_spm_text(symbols):
   """Decode a text in SPM (https://github.com/google/sentencepiece) format."""
   return u"".join(format_text(symbols).decode("utf-8").split()).replace(
       u"\u2581", u" ").strip().encode("utf-8")
-
-
-'''
-def dense_to_sparse(dense_tensor, sequence_length):
-    indices = tf.where(tf.sequence_mask(sequence_length))
-    print("Indices:" + str(indices))
-    values = tf.gather_nd(dense_tensor, indices)
-    print("Valuess:" + str(values))
-    shape = tf.shape(dense_tensor, out_type=tf.int64)
-    print("Shape:" + str(shape))
-    return tf.SparseTensor(indices, values, shape)
-'''
