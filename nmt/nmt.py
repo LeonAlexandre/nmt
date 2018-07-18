@@ -478,7 +478,7 @@ def extend_hparams(hparams):
 
   # Evaluation
   for metric in hparams.metrics:
-    if metric == "edit_distance":
+    if metric == "edit_distance" or metric == "hamming_distance":
       hparams.add_hparam("best_" + metric, -1*10*hparams.src_max_len)  # Smaller is better, try to maximize the negative edit_distance
     else:
       hparams.add_hparam("best_" + metric, 0)  # larger is better

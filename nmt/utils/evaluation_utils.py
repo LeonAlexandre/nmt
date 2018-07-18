@@ -48,6 +48,8 @@ def evaluate(ref_file, trans_file, metric, subword_option=None):
     evaluation_score = _word_accuracy(ref_file, trans_file)
   elif metric.lower() == "edit_distance":
     evaluation_score = _edit_distance(ref_file, trans_file)
+  elif metric.lower() == "hamming_distance":
+    evaluation_score = _hamming_distance(ref_file, trans_file)
   else:
     raise ValueError("Unknown metric %s" % metric)
 
@@ -70,45 +72,77 @@ def _clean(sentence, subword_option):
 
 
 def _edit_distance(ref_file, predict_file):
-    with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file,"rb")) as ref_fh:
-        with codecs.getreader("utf-8")(tf.gfile.GFile(predict_file,"rb")) as predict_fh:
-            ed_dis = 0
-            #num_lines_pred = sum(1 for line in predict_fh)
-            num_lines = sum(1 for line in ref_fh)
-            #print(num_lines)
-            ref_fh.seek(0)
-            for (ref_line, predict_line) in zip(ref_fh, predict_fh):
-                ref_line = ref_line.strip()
-                predict_line = predict_line.strip()
-                ref_line = ref_line.replace(" ","")
-                predict_line = predict_line.replace(" ","")
-                ed_dis += lv.distance(ref_line,predict_line)
-                #print("Label: " + ref_line)
-                #print("Prediction: " + predict_line)
-          
-    
-    """
-    with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file, "rb")) as ref_fh:
-        with codecs.getreader("utf-8")(tf.gfile.GFile(pred_file, "rb")) as pred_fh:
-            ed_dis = 0
-            num_lines_pred = sum(1 for line in pred_fh)
-            num_lines = sum(1 for line in ref_fh)
-            print("Num lines ref: " + str(num_lines))
-            print("Num lines pred: " + str(num_lines_pred))
-            
-            ref_fh.seek(0)
-            pred_fh.seek(0)
-            
-            for ref in ref_fh:
-                #print("Entered the loop")
-                ref = ref.strip()
-                pred = pred_fh.readline().strip()
-                ed_dis += lv.distance(ref,pred)
-    """
-    avg = -1 * ed_dis / num_lines
-    
-    return avg
+
+  '''
+  Computes the edit_distance averaged over the total number of sequences in the files
+  Returns the negative of the average distance to be compatible with the code base, specifically trying to maximize a given metric
+  '''
+
+  with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file,"rb")) as ref_fh:
+    with codecs.getreader("utf-8")(tf.gfile.GFile(predict_file,"rb")) as predict_fh:
+        ed_dis = 0
+        #num_lines_pred = sum(1 for line in predict_fh)
+        num_lines = sum(1 for line in ref_fh)
+        #print(num_lines)
+        ref_fh.seek(0)
+        for (ref_line, predict_line) in zip(ref_fh, predict_fh):
+          ref_line = ref_line.strip()
+          predict_line = predict_line.strip()
+          ref_line = ref_line.replace(" ","")
+          predict_line = predict_line.replace(" ","")
+          ed_dis += lv.distance(ref_line,predict_line)
+          #print("Label: " + ref_line)
+          #print("Prediction: " + predict_line)
+
+  avg = -1 * ed_dis / num_lines  
+  return avg
+
         
+def _hamming_distance(ref_file, predict_file):
+
+  '''
+  Computes the hamming distance average over the total number of sequences in the files
+  Because the hamming distance is not defined for sequences of different lengths
+  '''
+
+  with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file,"rb")) as ref_fh:
+    with codecs.getreader("utf-8")(tf.gfile.GFile(predict_file,"rb")) as predict_fh:
+      hdis = 0
+      num_lines = sum(1 for line in ref_fh)
+      ref_fh.seek(0)
+      num_printed = 0
+
+      for (ref_line, predict_line, line_number) in zip(ref_fh, predict_fh, range(num_lines)):
+        ref_line = ref_line.strip()
+        predict_line = predict_line.strip()
+        ref_line = ref_line.replace(" ","")
+        predict_line = predict_line.replace(" ","")
+
+        #if len(predict_line) != len(ref_line):
+        #  raise ValueError("Hamming distance undefined: predicted [%s] and reference [%s] does not have the same length", predict_line, ref_line)
+
+        len_predict = len(predict_line)
+        len_ref = len(ref_line)
+
+        if num_printed == int(0.05*num_lines):
+          print("More than 5% of the lines have length mismatch, suppress warning message")
+          num_printed += 1
+
+        if len_predict > len_ref:
+          predict_line = predict_line[:len_ref]
+          if num_printed < int(0.05*num_lines):
+            print("Network output longer than target on line #%d, truncating symbols past the target length" % line_number)
+            num_printed += 1
+        elif len_predict < len_ref:
+          predict_line = predict_line + "1" * (len_ref - len_predict)
+          if num_printed < int(0.05*num_lines):
+            print("Network output shorter than target on line #%d, padding to target length with \'1\'" % line_number)
+            num_printed += 1
+
+        hdis += sum(predict_sym != ref_sym for (predict_sym, ref_sym) in zip(predict_line, ref_line))
+    
+  avg = -1 * hdis / num_lines
+  return avg
         
 
 # Follow //transconsole/localization/machine_translation/metrics/bleu_calc.py
