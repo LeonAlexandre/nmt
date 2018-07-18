@@ -62,6 +62,8 @@ def add_arguments(parser):
                       help="Whether to use time-major mode for dynamic RNN.")
   parser.add_argument("--num_embeddings_partitions", type=int, default=0,
                       help="Number of partitions for embedding vars.")
+  parser.add_argument("--num_traces", type=int, default=1, 
+                      help="Number of traces per traget sequence.")
 
   # attention mechanisms
   parser.add_argument("--attention", type=str, default="", help="""\
@@ -136,6 +138,10 @@ def add_arguments(parser):
   # data
   parser.add_argument("--src", type=str, default=None,
                       help="Source suffix, e.g., en.")
+  parser.add_argument("--trace0", type=str, default=None,
+                      help="Trace0 file suffix, e.g., t0.")
+  praser.add_argument("--trace1", type=str, default=None,
+                      help="Trace1 file suffix, e.g., t1.")
   parser.add_argument("--tgt", type=str, default=None,
                       help="Target suffix, e.g., de.")
   parser.add_argument("--train_prefix", type=str, default=None,
@@ -292,6 +298,8 @@ def create_hparams(flags):
   return tf.contrib.training.HParams(
       # Data
       src=flags.src,
+      trace0=flags.trace0,
+      trace1=flags.trace1,
       tgt=flags.tgt,
       train_prefix=flags.train_prefix,
       dev_prefix=flags.dev_prefix,
@@ -311,6 +319,8 @@ def create_hparams(flags):
       residual=flags.residual,
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
+      num_traces = flags.num_traces,
+
 
       # Attention mechanisms
       attention=flags.attention,
@@ -414,9 +424,14 @@ def extend_hparams(hparams):
   if hparams.subword_option and hparams.subword_option not in ["spm", "bpe"]:
     raise ValueError("subword option must be either spm, or bpe")
 
+  if hparams.num_traces != 1:
+    hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+
   # Flags
   utils.print_out("# hparams:")
   utils.print_out("  src=%s" % hparams.src)
+  utils.print_out("  trace0=%s" % hparams.trace0)
+  utils.print_out("  trace1=%s" % hparams.trace1)
   utils.print_out("  tgt=%s" % hparams.tgt)
   utils.print_out("  train_prefix=%s" % hparams.train_prefix)
   utils.print_out("  dev_prefix=%s" % hparams.dev_prefix)
@@ -500,14 +515,6 @@ def ensure_compatible_hparams(hparams, default_hparams, hparams_path):
   default_hparams = utils.maybe_parse_standard_hparams(
       default_hparams, hparams_path)
 
-  # For compatible reason, if there are new fields in default_hparams,
-  #   we add them to the current hparams
-  default_config = default_hparams.values()
-  config = hparams.values()
-  for key in default_config:
-    if key not in config:
-      hparams.add_hparam(key, default_config[key])
-
   # Update all hparams' keys if override_loaded_hparams=True
   if default_hparams.override_loaded_hparams:
     for key in default_config:
@@ -516,6 +523,15 @@ def ensure_compatible_hparams(hparams, default_hparams, hparams_path):
                         (key, str(getattr(hparams, key)),
                          str(default_config[key])))
         setattr(hparams, key, default_config[key])
+
+  # For compatible reason, if there are new fields in default_hparams,
+  #   we add them to the current hparams
+  default_config = default_hparams.values()
+  config = hparams.values()
+  for key in default_config:
+    if key not in config:
+      hparams.add_hparam(key, default_config[key])
+
   return hparams
 
 
