@@ -1,0 +1,6 @@
+# log_file=./test-edit/log_1531873363
+# Start step 0, lr 0.0001, Tue Jul 17 17:22:46 2018
+  step 100 lr 0.0001 step-time 0.14s wps 26.84K ppl 3.28 gN 9.32 edit_distance 75.32, hamming_distance 15.27, Tue Jul 17 17:23:00 2018
+  step 200 lr 0.0001 step-time 0.12s wps 30.35K ppl 2.12 gN 8.01 edit_distance 75.32, hamming_distance 15.27, Tue Jul 17 17:23:12 2018
+  step 300 lr 0.0001 step-time 0.12s wps 30.53K ppl 2.02 gN 27.42 edit_distance 75.32, hamming_distance 15.27, Tue Jul 17 17:23:24 2018
+  step 400 lr 0.0001 step-time 0.12s wps 30.44K ppl 2.00 gN 28.44 edit_distance 75.32, hamming_distance 15.27, Tue Jul 17 17:23:36 2018
