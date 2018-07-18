@@ -68,8 +68,8 @@ def create_train_model(
     model_creator, hparams, scope=None, num_workers=1, jobid=0,
     extra_args=None):
   """Create train graph, model, and iterator."""
-  src_file = "%s.%s" % (hparams.train_prefix, hparams.src)
-  tgt_file = "%s.%s" % (hparams.train_prefix, hparams.tgt)
+  
+
   src_vocab_file = hparams.src_vocab_file
   tgt_vocab_file = hparams.tgt_vocab_file
 
@@ -79,25 +79,56 @@ def create_train_model(
     src_vocab_table, tgt_vocab_table = vocab_utils.create_vocab_tables(
         src_vocab_file, tgt_vocab_file, hparams.share_vocab)
 
-    src_dataset = tf.data.TextLineDataset(src_file)
-    tgt_dataset = tf.data.TextLineDataset(tgt_file)
-    skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
+    if hparams.num_traces == 1:
 
-    iterator = iterator_utils.get_iterator(
-        src_dataset,
-        tgt_dataset,
-        src_vocab_table,
-        tgt_vocab_table,
-        batch_size=hparams.batch_size,
-        sos=hparams.sos,
-        eos=hparams.eos,
-        random_seed=hparams.random_seed,
-        num_buckets=hparams.num_buckets,
-        src_max_len=hparams.src_max_len,
-        tgt_max_len=hparams.tgt_max_len,
-        skip_count=skip_count_placeholder,
-        num_shards=num_workers,
-        shard_index=jobid)
+      src_file = "%s.%s" % (hparams.train_prefix, hparams.src)
+      tgt_file = "%s.%s" % (hparams.train_prefix, hparams.tgt)
+
+      src_dataset = tf.data.TextLineDataset(src_file)
+      tgt_dataset = tf.data.TextLineDataset(tgt_file)
+      skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
+
+      iterator = iterator_utils.get_iterator(
+          src_dataset,
+          tgt_dataset,
+          src_vocab_table,
+          tgt_vocab_table,
+          batch_size=hparams.batch_size,
+          sos=hparams.sos,
+          eos=hparams.eos,
+          random_seed=hparams.random_seed,
+          num_buckets=hparams.num_buckets,
+          src_max_len=hparams.src_max_len,
+          tgt_max_len=hparams.tgt_max_len,
+          skip_count=skip_count_placeholder,
+          num_shards=num_workers,
+          shard_index=jobid)
+
+    else:   # 2 traces
+
+      trace0_file = "%s.%s" % (haprams.train_prefix, hparams.trace0)
+      trace0_fil1 = "%s.%s" % (haprams.train_prefix, hparams.trace1)
+
+      trace0_dataset = tf.data.TextLineDataset(src_file)
+      trace1_dataset = tf.data.TextLineDataset(src_file)
+      skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
+
+      iterator = iterator_utils.get_iterator2t(
+          trace0_dataset,
+          trace1_dataset,
+          tgt_dataset,
+          src_vocab_table,
+          tgt_vocab_table,
+          batch_size=hparams.batch_size,
+          sos=hparams.sos,
+          eos=hparams.eos,
+          random_seed=hparams.random_seed,
+          num_buckets=hparams.num_buckets,
+          src_max_len=hparams.src_max_len,
+          tgt_max_len=hparams.tgt_max_len,
+          skip_count=skip_count_placeholder,
+          num_shards=num_workers,
+          shard_index=jobid)
 
     # Note: One can set model_device_fn to
     # `tf.train.replica_device_setter(ps_tasks)` for distributed training.
@@ -126,6 +157,12 @@ class EvalModel(
                             "tgt_file_placeholder", "iterator"))):
   pass
 
+# 2 trace version
+class EvalModel2t(
+  collections.namedtuple("EvalModel",
+                           ("graph", "model", "trace0_file_placeholder", "trace1_file_placeholder"
+                            "tgt_file_placeholder", "iterator"))):
+  pass
 
 def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
   """Create train graph, model, src/tgt file holders, and iterator."""
@@ -136,22 +173,52 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
   with graph.as_default(), tf.container(scope or "eval"):
     src_vocab_table, tgt_vocab_table = vocab_utils.create_vocab_tables(
         src_vocab_file, tgt_vocab_file, hparams.share_vocab)
-    src_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
-    tgt_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
-    src_dataset = tf.data.TextLineDataset(src_file_placeholder)
-    tgt_dataset = tf.data.TextLineDataset(tgt_file_placeholder)
-    iterator = iterator_utils.get_iterator(
-        src_dataset,
-        tgt_dataset,
-        src_vocab_table,
-        tgt_vocab_table,
-        hparams.batch_size,
-        sos=hparams.sos,
-        eos=hparams.eos,
-        random_seed=hparams.random_seed,
-        num_buckets=hparams.num_buckets,
-        src_max_len=hparams.src_max_len_infer,
-        tgt_max_len=hparams.tgt_max_len_infer)
+
+    if hparams.num_traces == 1:
+
+      src_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
+      tgt_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
+      src_dataset = tf.data.TextLineDataset(src_file_placeholder)
+      tgt_dataset = tf.data.TextLineDataset(tgt_file_placeholder)
+      iterator = iterator_utils.get_iterator(
+          src_dataset,
+          tgt_dataset,
+          src_vocab_table,
+          tgt_vocab_table,
+          hparams.batch_size,
+          sos=hparams.sos,
+          eos=hparams.eos,
+          random_seed=hparams.random_seed,
+          num_buckets=hparams.num_buckets,
+          src_max_len=hparams.src_max_len_infer,
+          tgt_max_len=hparams.tgt_max_len_infer)
+
+    else:   # 2 traces
+
+      trace0_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
+      trace1_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
+      tgt_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
+      trace0_dataset = tf.data.TextLineDataset(trace0_file_placeholder)
+      trace1_dataset = tf.data.TextLineDataset(trace1_file_placeholder)
+      tgt_dataset = tf.data.TextLineDataset(tgt_file_placeholder)
+
+      iterator = iterator_utils.get_iterator2t(
+          trace0_dataset,
+          trace1_dataset,
+          tgt_dataset,
+          src_vocab_table,
+          tgt_vocab_table,
+          batch_size=hparams.batch_size,
+          sos=hparams.sos,
+          eos=hparams.eos,
+          random_seed=hparams.random_seed,
+          num_buckets=hparams.num_buckets,
+          src_max_len=hparams.src_max_len,
+          tgt_max_len=hparams.tgt_max_len,
+          skip_count=skip_count_placeholder,
+          num_shards=num_workers,
+          shard_index=jobid)
+
     model = model_creator(
         hparams,
         iterator=iterator,
@@ -160,10 +227,20 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
         target_vocab_table=tgt_vocab_table,
         scope=scope,
         extra_args=extra_args)
-  return EvalModel(
+  
+  if hparams.num_traces == 1:
+    return EvalModel(
       graph=graph,
       model=model,
       src_file_placeholder=src_file_placeholder,
+      tgt_file_placeholder=tgt_file_placeholder,
+      iterator=iterator)
+  else:
+    return EvalModel2t(
+      graph=graph,
+      model=model,
+      trace0_file_placeholder=trace0_file_placeholder,
+      trace1_file_placeholder=trace1_file_placeholder,
       tgt_file_placeholder=tgt_file_placeholder,
       iterator=iterator)
 
@@ -171,6 +248,12 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
 class InferModel(
     collections.namedtuple("InferModel",
                            ("graph", "model", "src_placeholder",
+                            "batch_size_placeholder", "iterator"))):
+  pass
+
+class InferModel2t(
+    collections.namedtuple("InferModel",
+                           ("graph", "model", "trace0_placeholder", "trace1_placeholder",
                             "batch_size_placeholder", "iterator"))):
   pass
 
@@ -187,6 +270,7 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
     reverse_tgt_vocab_table = lookup_ops.index_to_string_table_from_file(
         tgt_vocab_file, default_value=vocab_utils.UNK)
 
+
     src_placeholder = tf.placeholder(shape=[None], dtype=tf.string)
     batch_size_placeholder = tf.placeholder(shape=[], dtype=tf.int64)
 
@@ -197,7 +281,8 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
         src_vocab_table,
         batch_size=batch_size_placeholder,
         eos=hparams.eos,
-        src_max_len=hparams.src_max_len_infer)
+          src_max_len=hparams.src_max_len_infer)
+
     model = model_creator(
         hparams,
         iterator=iterator,

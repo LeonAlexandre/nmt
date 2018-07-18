@@ -556,56 +556,102 @@ class Model(BaseModel):
     num_residual_layers = self.num_encoder_residual_layers
     iterator = self.iterator
 
-    source = iterator.source
-    if self.time_major:
-      source = tf.transpose(source)
+    if hparams.num_traces == 1:
 
-    with tf.variable_scope("encoder") as scope:
-      dtype = scope.dtype
-      # Look up embedding, emp_inp: [max_time, batch_size, num_units]
-      encoder_emb_inp = tf.nn.embedding_lookup(
-          self.embedding_encoder, source)
+      source = iterator.source
+      if self.time_major:
+        source = tf.transpose(source)
 
-      # Encoder_outputs: [max_time, batch_size, num_units]
-      if hparams.encoder_type == "uni":
-        utils.print_out("  num_layers = %d, num_residual_layers=%d" %
-                        (num_layers, num_residual_layers))
-        cell = self._build_encoder_cell(
-            hparams, num_layers, num_residual_layers)
+      with tf.variable_scope("encoder") as scope:
+        dtype = scope.dtype
+        # Look up embedding, emp_inp: [max_time, batch_size, num_units]
+        encoder_emb_inp = tf.nn.embedding_lookup(
+            self.embedding_encoder, source)
 
-        encoder_outputs, encoder_state = tf.nn.dynamic_rnn(
-            cell,
-            encoder_emb_inp,
-            dtype=dtype,
-            sequence_length=iterator.source_sequence_length,
-            time_major=self.time_major,
-            swap_memory=True)
-      elif hparams.encoder_type == "bi":
-        num_bi_layers = int(num_layers / 2)
-        num_bi_residual_layers = int(num_residual_layers / 2)
-        utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
-                        (num_bi_layers, num_bi_residual_layers))
+        # Encoder_outputs: [max_time, batch_size, num_units]
+        if hparams.encoder_type == "uni":
+          utils.print_out("  num_layers = %d, num_residual_layers=%d" %
+                          (num_layers, num_residual_layers))
+          cell = self._build_encoder_cell(
+              hparams, num_layers, num_residual_layers)
 
-        encoder_outputs, bi_encoder_state = (
-            self._build_bidirectional_rnn(
-                inputs=encoder_emb_inp,
-                sequence_length=iterator.source_sequence_length,
-                dtype=dtype,
-                hparams=hparams,
-                num_bi_layers=num_bi_layers,
-                num_bi_residual_layers=num_bi_residual_layers))
+          encoder_outputs, encoder_state = tf.nn.dynamic_rnn(
+              cell,
+              encoder_emb_inp,
+              dtype=dtype,
+              sequence_length=iterator.source_sequence_length,
+              time_major=self.time_major,
+              swap_memory=True)
+        elif hparams.encoder_type == "bi":
+          num_bi_layers = int(num_layers / 2)
+          num_bi_residual_layers = int(num_residual_layers / 2)
+          utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
+                          (num_bi_layers, num_bi_residual_layers))
 
-        if num_bi_layers == 1:
-          encoder_state = bi_encoder_state
+          encoder_outputs, bi_encoder_state = (
+              self._build_bidirectional_rnn(
+                  inputs=encoder_emb_inp,
+                  sequence_length=iterator.source_sequence_length,
+                  dtype=dtype,
+                  hparams=hparams,
+                  num_bi_layers=num_bi_layers,
+                  num_bi_residual_layers=num_bi_residual_layers))
+
+          if num_bi_layers == 1:
+            encoder_state = bi_encoder_state
+          else:
+            # alternatively concat forward and backward states
+            encoder_state = []
+            for layer_id in range(num_bi_layers):
+              encoder_state.append(bi_encoder_state[0][layer_id])  # forward
+              encoder_state.append(bi_encoder_state[1][layer_id])  # backward
+            encoder_state = tuple(encoder_state)
         else:
-          # alternatively concat forward and backward states
-          encoder_state = []
-          for layer_id in range(num_bi_layers):
-            encoder_state.append(bi_encoder_state[0][layer_id])  # forward
-            encoder_state.append(bi_encoder_state[1][layer_id])  # backward
-          encoder_state = tuple(encoder_state)
-      else:
-        raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
+          raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
+
+    else:   # 2 traces
+
+      trace0 = iterator.trace0
+      trace1 = iterator.trace1
+      if self.time_major:
+        trace0 = tf.transpose(trace0)
+        trace1 = tf.transpose(trace1)
+
+      with tf.variable_scope("encoder") as scope:
+        dtype = scope.dtype
+
+        enc0_emb_inp = tf.nn.embedding_lookup(
+            self.embedding_encoder, trace0)
+        enc1_emb_inp = tf.nn.embedding_lookup(
+            self.embedding_encoder, trace1)
+
+        if hparams.encoder_type == "uni":   # only test for unidirectional RNN first
+
+          utils.print_out("  num_layers = %d, num_residual_layers=%d" %
+                          (num_layers, num_residual_layers))
+          cell0 = self._build_encoder_cell(
+              hparams, num_layers, num_residual_layers)
+          cell1 = self._build_encoder_cell(
+              hparams, num_layers, num_residual_layers)
+
+          enc0_outputs, enc0_state = tf.nn.dynamic_rnn(
+              cell0,
+              enc0_emb_inp,
+              dtype=dtype,
+              sequence_length=iterator.trace0_seq_length,
+              time_major=self.time_major,
+              swap_memory=True)
+          enc1_outputs, enc1_state = tf.nn.dynamic_rnn(
+              cell1,
+              enc1_emb_inp,
+              dtype=dtype,
+              sequence_length=iterator.trace1_seq_length,
+              time_major=self.time_major,
+              swap_memory=True)
+
+          encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
+          encoder_state = tf.concat([enc0_state,enc1_state],-1)
+
     return encoder_outputs, encoder_state
 
   def _build_bidirectional_rnn(self, inputs, sequence_length,
