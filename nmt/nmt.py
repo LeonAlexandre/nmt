@@ -233,7 +233,7 @@ def add_arguments(parser):
   parser.add_argument("--override_loaded_hparams", type="bool", nargs="?",
                       const=True, default=False,
                       help="Override loaded hparams with values specified")
-  parser.add_argument("--num_keep_ckpts", type=int, default=5,
+  parser.add_argument("--num_keep_ckpts", type=int, default=1,
                       help="Max number of checkpoints to keep.")
   parser.add_argument("--avg_ckpts", type="bool", nargs="?",
                       const=True, default=False, help=("""\
@@ -478,7 +478,7 @@ def extend_hparams(hparams):
 
   # Evaluation
   for metric in hparams.metrics:
-    if metric == "edit_distance":
+    if metric == "edit_distance" or metric == "hamming_distance":
       hparams.add_hparam("best_" + metric, -1*10*hparams.src_max_len)  # Smaller is better, try to maximize the negative edit_distance
     else:
       hparams.add_hparam("best_" + metric, 0)  # larger is better
