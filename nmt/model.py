@@ -870,7 +870,7 @@ class Model2t(BaseModel):
 
 ###############################################################################################
 ###############################################################################################
-### Same implementation as Model
+### 
   def _build_decoder_cell(self, hparams, encoder_outputs, encoder_state,
                           trace_sequence_length):
     """Build an RNN cell that can be used by decoder."""
@@ -880,7 +880,7 @@ class Model2t(BaseModel):
 
     cell = model_helper.create_rnn_cell(
         unit_type=hparams.unit_type,
-        num_units=hparams.num_units,
+        num_units=hparams.num_decoder_units,
         num_layers=self.num_decoder_layers,
         num_residual_layers=self.num_decoder_residual_layers,
         forget_bias=hparams.forget_bias,
@@ -932,8 +932,8 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace0_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-        print("enc0 outputs: " + str(enc0_outputs))
-        print("enc0 state: " + str(enc0_state))
+    print("enc0 outputs: " + str(enc0_outputs))
+    print("enc0 state: " + str(enc0_state))
 
     with tf.variable_scope("encoder1") as scope:
       dtype = scope.dtype
@@ -954,11 +954,32 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace1_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-        print("enc1 outputs: " + str(enc1_outputs))
-        print("enc1 state: " + str(enc1_state))
+      print("enc1 outputs: " + str(enc1_outputs))
+      print("enc1 state: " + str(enc1_state))
 
     encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
-    encoder_state = tf.concat([enc0_state,enc1_state],-1)
+    #encoder_state = tf.concat([enc0_state,enc1_state],-1)
+
+    print("Enc0 layer0 c: " + str(enc0_state[0][0]))
+    print("Enc0 layer1 h: " + str(enc0_state[0][1]))
+
+    # Layer 0
+    cat_c0 = tf.concat([enc0_state[0][0],enc1_state[0][0]],-1)
+    print("Concat encoder c0: " + str(cat_c0))
+    cat_h0 = tf.concat([enc0_state[0][1],enc1_state[0][1]],-1)
+    print("Concat encoder h0: " + str(cat_h0))
+    layer0_state = tf.nn.rnn_cell.LSTMStateTuple(cat_c0,cat_h0)
+    print("Concat layer0 state: " + str(layer0_state))
+
+    # Layer 1
+    cat_c1 = tf.concat([enc0_state[1][0],enc1_state[1][0]],-1)
+    print("Concat encoder c1: " + str(cat_c1))
+    cat_h1 = tf.concat([enc0_state[1][1],enc1_state[1][1]],-1)
+    print("Concat encoder h1: " + str(cat_h1))
+    layer1_state = tf.nn.rnn_cell.LSTMStateTuple(cat_c1,cat_h1)
+    print("Concat layer0 state: " + str(layer0_state))
+
+    encoder_state = tuple([layer0_state,layer1_state])
 
     print("Concat encoder outputs: " + str(encoder_outputs))
     print("Concat encoder state: " + str(encoder_state))
