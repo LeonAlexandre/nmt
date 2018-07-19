@@ -580,6 +580,8 @@ class Model(BaseModel):
             sequence_length=iterator.source_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
+        print("Old model encoder outputs: " + str(encoder_outputs))
+        print("Old model encoder state: " + str(encoder_state))
       elif hparams.encoder_type == "bi":
         num_bi_layers = int(num_layers / 2)
         num_bi_residual_layers = int(num_residual_layers / 2)
@@ -822,6 +824,8 @@ class Model2t(BaseModel):
       utils.print_out("  %s, %s, %s" % (param.name, str(param.get_shape()),
                                         param.op.device))
 
+###############################################################################################
+###############################################################################################
 
   def build_graph(self, hparams, scope=None):
     """Subclass must implement this method.
@@ -864,6 +868,38 @@ class Model2t(BaseModel):
 
     return logits, loss, final_context_state, sample_id
 
+###############################################################################################
+###############################################################################################
+### Same implementation as Model
+  def _build_decoder_cell(self, hparams, encoder_outputs, encoder_state,
+                          trace_sequence_length):
+    """Build an RNN cell that can be used by decoder."""
+    # We only make use of encoder_outputs in attention-based models
+    if hparams.attention:
+      raise ValueError("BasicModel doesn't support attention.")
+
+    cell = model_helper.create_rnn_cell(
+        unit_type=hparams.unit_type,
+        num_units=hparams.num_units,
+        num_layers=self.num_decoder_layers,
+        num_residual_layers=self.num_decoder_residual_layers,
+        forget_bias=hparams.forget_bias,
+        dropout=hparams.dropout,
+        num_gpus=self.num_gpus,
+        mode=self.mode,
+        single_cell_fn=self.single_cell_fn)
+
+    # For beam search, we need to replicate encoder infos beam_width times
+    if self.mode == tf.contrib.learn.ModeKeys.INFER and hparams.beam_width > 0:
+      decoder_initial_state = tf.contrib.seq2seq.tile_batch(
+          encoder_state, multiplier=hparams.beam_width)
+    else:
+      decoder_initial_state = encoder_state
+
+    return cell, decoder_initial_state
+
+###############################################################################################
+###############################################################################################
 
   def _build_encoder(self, hparams):
     """Build an encoder."""
@@ -896,6 +932,8 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace0_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
+        print("enc0 outputs: " + str(enc0_outputs))
+        print("enc0 state: " + str(enc0_state))
 
     with tf.variable_scope("encoder1") as scope:
       dtype = scope.dtype
@@ -916,8 +954,135 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace1_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
+        print("enc1 outputs: " + str(enc1_outputs))
+        print("enc1 state: " + str(enc1_state))
 
     encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
     encoder_state = tf.concat([enc0_state,enc1_state],-1)
 
+    print("Concat encoder outputs: " + str(encoder_outputs))
+    print("Concat encoder state: " + str(encoder_state))
+
     return encoder_outputs, encoder_state
+
+###############################################################################################
+###############################################################################################
+
+  def _build_decoder(self, encoder_outputs, encoder_state, hparams):
+    """Build and run a RNN decoder with a final projection layer.
+
+    Args:
+      encoder_outputs: The outputs of encoder for every time step.
+      encoder_state: The final state of the encoder.
+      hparams: The Hyperparameters configurations.
+
+    Returns:
+      A tuple of final logits and final decoder state:
+        logits: size [time, batch_size, vocab_size] when time_major=True.
+    """
+    tgt_sos_id = tf.cast(self.tgt_vocab_table.lookup(tf.constant(hparams.sos)),
+                         tf.int32)
+    tgt_eos_id = tf.cast(self.tgt_vocab_table.lookup(tf.constant(hparams.eos)),
+                         tf.int32)
+    iterator = self.iterator
+
+    # maximum_iteration: The maximum decoding steps.
+    maximum_iterations = self._get_infer_maximum_iterations(
+        hparams, iterator.trace0_sequence_length)
+
+    ## Decoder.
+    with tf.variable_scope("decoder") as decoder_scope:
+      cell, decoder_initial_state = self._build_decoder_cell(
+          hparams, encoder_outputs, encoder_state,
+          iterator.trace0_sequence_length)
+
+      ## Train or eval
+      if self.mode != tf.contrib.learn.ModeKeys.INFER:
+        # decoder_emp_inp: [max_time, batch_size, num_units]
+        target_input = iterator.target_input
+        if self.time_major:
+          target_input = tf.transpose(target_input)
+        decoder_emb_inp = tf.nn.embedding_lookup(
+            self.embedding_decoder, target_input)
+
+        # Helper
+        helper = tf.contrib.seq2seq.TrainingHelper(
+            decoder_emb_inp, iterator.target_sequence_length,
+            time_major=self.time_major)
+
+        # Decoder
+        my_decoder = tf.contrib.seq2seq.BasicDecoder(
+            cell,
+            helper,
+            decoder_initial_state,)
+
+        # Dynamic decoding
+        outputs, final_context_state, _ = tf.contrib.seq2seq.dynamic_decode(
+            my_decoder,
+            output_time_major=self.time_major,
+            swap_memory=True,
+            scope=decoder_scope)
+
+        sample_id = outputs.sample_id
+
+        # Note: there's a subtle difference here between train and inference.
+        # We could have set output_layer when create my_decoder
+        #   and shared more code between train and inference.
+        # We chose to apply the output_layer to all timesteps for speed:
+        #   10% improvements for small models & 20% for larger ones.
+        # If memory is a concern, we should apply output_layer per timestep.
+        logits = self.output_layer(outputs.rnn_output)
+
+      ## Inference
+      else:
+        beam_width = hparams.beam_width
+        length_penalty_weight = hparams.length_penalty_weight
+        start_tokens = tf.fill([self.batch_size], tgt_sos_id)
+        end_token = tgt_eos_id
+
+        if beam_width > 0:
+          my_decoder = tf.contrib.seq2seq.BeamSearchDecoder(
+              cell=cell,
+              embedding=self.embedding_decoder,
+              start_tokens=start_tokens,
+              end_token=end_token,
+              initial_state=decoder_initial_state,
+              beam_width=beam_width,
+              output_layer=self.output_layer,
+              length_penalty_weight=length_penalty_weight)
+        else:
+          # Helper
+          sampling_temperature = hparams.sampling_temperature
+          if sampling_temperature > 0.0:
+            helper = tf.contrib.seq2seq.SampleEmbeddingHelper(
+                self.embedding_decoder, start_tokens, end_token,
+                softmax_temperature=sampling_temperature,
+                seed=hparams.random_seed)
+          else:
+            helper = tf.contrib.seq2seq.GreedyEmbeddingHelper(
+                self.embedding_decoder, start_tokens, end_token)
+
+          # Decoder
+          my_decoder = tf.contrib.seq2seq.BasicDecoder(
+              cell,
+              helper,
+              decoder_initial_state,
+              output_layer=self.output_layer  # applied per timestep
+          )
+
+        # Dynamic decoding
+        outputs, final_context_state, _ = tf.contrib.seq2seq.dynamic_decode(
+            my_decoder,
+            maximum_iterations=maximum_iterations,
+            output_time_major=self.time_major,
+            swap_memory=True,
+            scope=decoder_scope)
+
+        if beam_width > 0:
+          logits = tf.no_op()
+          sample_id = outputs.predicted_ids
+        else:
+          logits = outputs.rnn_output
+          sample_id = outputs.sample_id
+
+    return logits, sample_id, final_context_state
