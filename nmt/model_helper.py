@@ -106,11 +106,13 @@ def create_train_model(
 
     else:   # 2 traces
 
-      trace0_file = "%s.%s" % (haprams.train_prefix, hparams.trace0)
-      trace1_file = "%s.%s" % (haprams.train_prefix, hparams.trace1)
+      trace0_file = "%s.%s" % (hparams.train_prefix, hparams.trace0)
+      trace1_file = "%s.%s" % (hparams.train_prefix, hparams.trace1)
+      tgt_file = "%s.%s" % (hparams.train_prefix, hparams.tgt)
 
       trace0_dataset = tf.data.TextLineDataset(trace0_file)
       trace1_dataset = tf.data.TextLineDataset(trace1_file)
+      tgt_dataset = tf.data.TextLineDataset(tgt_file)
       skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
 
       iterator = iterator_utils.get_iterator2t(

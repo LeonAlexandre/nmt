@@ -283,7 +283,10 @@ def train(hparams, scope=None, target_session=""):
     steps_per_external_eval = 5 * steps_per_eval
 
   if not hparams.attention:
-    model_creator = nmt_model.Model
+    if hparams.num_traces == 1: 
+      model_creator = nmt_model.Model
+    else:
+      model_creator = nmt_model.Model2t
   else:  # Attention
     if (hparams.encoder_type == "gnmt" or
         hparams.attention_architecture in ["gnmt", "gnmt_v2"]):

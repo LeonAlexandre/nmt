@@ -210,7 +210,7 @@ def get_iterator(src_dataset,
       target_sequence_length=tgt_seq_len)
 
 def get_iterator2t(trace0_dataset,
-                   trace1_dataset
+                   trace1_dataset,
                    tgt_dataset,
                    src_vocab_table,
                    tgt_vocab_table,
@@ -249,7 +249,7 @@ def get_iterator2t(trace0_dataset,
 
   # Filter zero length input sequences.
   src_tgt_dataset = src_tgt_dataset.filter(
-      lambda trace0, trace1, tgt: tf.logical_and(tf.size(trace0) > 0, tf.size(trace1) > 0, tf.size(tgt) > 0))
+      lambda trace0, trace1, tgt: tf.logical_and(tf.logical_and(tf.size(trace0) > 0, tf.size(trace1) > 0),  tf.size(tgt) > 0))
 
   if src_max_len:
     src_tgt_dataset = src_tgt_dataset.map(
@@ -263,7 +263,7 @@ def get_iterator2t(trace0_dataset,
   # vocab get the lookup table's default_value integer.
   src_tgt_dataset = src_tgt_dataset.map(
       lambda trace0, trace1, tgt: (tf.cast(src_vocab_table.lookup(trace0), tf.int32),
-                                   tf.cast(src_vocab_table.lookup(trace1), tf.int32)
+                                   tf.cast(src_vocab_table.lookup(trace1), tf.int32),
                                    tf.cast(tgt_vocab_table.lookup(tgt), tf.int32)),
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
   # Create a tgt_input prefixed with <sos> and a tgt_output suffixed with <eos>.
@@ -275,7 +275,7 @@ def get_iterator2t(trace0_dataset,
   # Add in sequence lengths.
   src_tgt_dataset = src_tgt_dataset.map(
       lambda trace0, trace1, tgt_in, tgt_out: (
-          trace0, trace1, tgt_in, tgt_out, tf.size(src), tf.size(tgt_in)),
+          trace0, trace1, tgt_in, tgt_out, tf.size(trace0), tf.size(trace1), tf.size(tgt_in)),
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
 
   # Bucket by source sequence length (buckets for lengths 0-9, 10-19, ...)
@@ -286,24 +286,28 @@ def get_iterator2t(trace0_dataset,
         # these have unknown-length vectors.  The last two entries are
         # the source and target row sizes; these are scalars.
         padded_shapes=(
-            tf.TensorShape([None]),  # src
+            tf.TensorShape([None]),  # trace0
+            tf.TensorShape([None]),  # trace1
             tf.TensorShape([None]),  # tgt_input
             tf.TensorShape([None]),  # tgt_output
-            tf.TensorShape([]),  # src_len
+            tf.TensorShape([]),  # trace0_len
+            tf.TensorShape([]),  # trace1_len
             tf.TensorShape([])),  # tgt_len
         # Pad the source and target sequences with eos tokens.
         # (Though notice we don't generally need to do this since
         # later on we will be masking out calculations past the true sequence.
         padding_values=(
-            src_eos_id,  # src
+            src_eos_id,  # trace0
+            src_eos_id,  # trace1
             tgt_eos_id,  # tgt_input
             tgt_eos_id,  # tgt_output
-            0,  # src_len -- unused
+            0,  # trace0_len -- unused
+            0,  # trace1_len -- unused
             0))  # tgt_len -- unused
-
+  '''  
   if num_buckets > 1:
 
-    def key_func(unused_1, unused_2, unused_3, src_len, tgt_len):
+    def key_func(unused_1, unused_2, unused_3, unused4, unused5, src_len, tgt_len):
       # Calculate bucket_width by maximum source sequence length.
       # Pairs with length [0, bucket_width) go to bucket 0, length
       # [bucket_width, 2 * bucket_width) go to bucket 1, etc.  Pairs with length
@@ -326,10 +330,12 @@ def get_iterator2t(trace0_dataset,
             key_func=key_func, reduce_func=reduce_func, window_size=batch_size))
 
   else:
-    batched_dataset = batching_func(src_tgt_dataset)
+  '''
+  batched_dataset = batching_func(src_tgt_dataset)
   batched_iter = batched_dataset.make_initializable_iterator()
   (trace0_ids, trace1_ids, tgt_input_ids, tgt_output_ids, trace0_seq_len, trace1_seq_len,
    tgt_seq_len) = (batched_iter.get_next())
+
   return BatchedInput2t(
       initializer=batched_iter.initializer,
       trace0=trace0_ids,

@@ -140,7 +140,7 @@ def add_arguments(parser):
                       help="Source suffix, e.g., en.")
   parser.add_argument("--trace0", type=str, default=None,
                       help="Trace0 file suffix, e.g., t0.")
-  praser.add_argument("--trace1", type=str, default=None,
+  parser.add_argument("--trace1", type=str, default=None,
                       help="Trace1 file suffix, e.g., t1.")
   parser.add_argument("--tgt", type=str, default=None,
                       help="Target suffix, e.g., de.")
@@ -206,7 +206,7 @@ def add_arguments(parser):
                             "Save checkpoint every 10x steps_per_stats"))
   parser.add_argument("--max_train", type=int, default=0,
                       help="Limit on the size of training data (0: no limit).")
-  parser.add_argument("--num_buckets", type=int, default=5,
+  parser.add_argument("--num_buckets", type=int, default=1,
                       help="Put data into similar-length buckets.")
 
   # SPM

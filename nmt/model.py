@@ -556,101 +556,56 @@ class Model(BaseModel):
     num_residual_layers = self.num_encoder_residual_layers
     iterator = self.iterator
 
-    if hparams.num_traces == 1:
+    source = iterator.source
+    if self.time_major:
+      source = tf.transpose(source)
 
-      source = iterator.source
-      if self.time_major:
-        source = tf.transpose(source)
+    with tf.variable_scope("encoder") as scope:
+      dtype = scope.dtype
+      # Look up embedding, emp_inp: [max_time, batch_size, num_units]
+      encoder_emb_inp = tf.nn.embedding_lookup(
+          self.embedding_encoder, source)
 
-      with tf.variable_scope("encoder") as scope:
-        dtype = scope.dtype
-        # Look up embedding, emp_inp: [max_time, batch_size, num_units]
-        encoder_emb_inp = tf.nn.embedding_lookup(
-            self.embedding_encoder, source)
+      # Encoder_outputs: [max_time, batch_size, num_units]
+      if hparams.encoder_type == "uni":
+        utils.print_out("  num_layers = %d, num_residual_layers=%d" %
+                        (num_layers, num_residual_layers))
+        cell = self._build_encoder_cell(
+            hparams, num_layers, num_residual_layers)
 
-        # Encoder_outputs: [max_time, batch_size, num_units]
-        if hparams.encoder_type == "uni":
-          utils.print_out("  num_layers = %d, num_residual_layers=%d" %
-                          (num_layers, num_residual_layers))
-          cell = self._build_encoder_cell(
-              hparams, num_layers, num_residual_layers)
+        encoder_outputs, encoder_state = tf.nn.dynamic_rnn(
+            cell,
+            encoder_emb_inp,
+            dtype=dtype,
+            sequence_length=iterator.source_sequence_length,
+            time_major=self.time_major,
+            swap_memory=True)
+      elif hparams.encoder_type == "bi":
+        num_bi_layers = int(num_layers / 2)
+        num_bi_residual_layers = int(num_residual_layers / 2)
+        utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
+                        (num_bi_layers, num_bi_residual_layers))
 
-          encoder_outputs, encoder_state = tf.nn.dynamic_rnn(
-              cell,
-              encoder_emb_inp,
-              dtype=dtype,
-              sequence_length=iterator.source_sequence_length,
-              time_major=self.time_major,
-              swap_memory=True)
-        elif hparams.encoder_type == "bi":
-          num_bi_layers = int(num_layers / 2)
-          num_bi_residual_layers = int(num_residual_layers / 2)
-          utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
-                          (num_bi_layers, num_bi_residual_layers))
+        encoder_outputs, bi_encoder_state = (
+            self._build_bidirectional_rnn(
+                inputs=encoder_emb_inp,
+                sequence_length=iterator.source_sequence_length,
+                dtype=dtype,
+                hparams=hparams,
+                num_bi_layers=num_bi_layers,
+                num_bi_residual_layers=num_bi_residual_layers))
 
-          encoder_outputs, bi_encoder_state = (
-              self._build_bidirectional_rnn(
-                  inputs=encoder_emb_inp,
-                  sequence_length=iterator.source_sequence_length,
-                  dtype=dtype,
-                  hparams=hparams,
-                  num_bi_layers=num_bi_layers,
-                  num_bi_residual_layers=num_bi_residual_layers))
-
-          if num_bi_layers == 1:
-            encoder_state = bi_encoder_state
-          else:
-            # alternatively concat forward and backward states
-            encoder_state = []
-            for layer_id in range(num_bi_layers):
-              encoder_state.append(bi_encoder_state[0][layer_id])  # forward
-              encoder_state.append(bi_encoder_state[1][layer_id])  # backward
-            encoder_state = tuple(encoder_state)
+        if num_bi_layers == 1:
+          encoder_state = bi_encoder_state
         else:
-          raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
-
-    else:   # 2 traces
-
-      trace0 = iterator.trace0
-      trace1 = iterator.trace1
-      if self.time_major:
-        trace0 = tf.transpose(trace0)
-        trace1 = tf.transpose(trace1)
-
-      with tf.variable_scope("encoder") as scope:
-        dtype = scope.dtype
-
-        enc0_emb_inp = tf.nn.embedding_lookup(
-            self.embedding_encoder, trace0)
-        enc1_emb_inp = tf.nn.embedding_lookup(
-            self.embedding_encoder, trace1)
-
-        if hparams.encoder_type == "uni":   # only test for unidirectional RNN first
-
-          utils.print_out("  num_layers = %d, num_residual_layers=%d" %
-                          (num_layers, num_residual_layers))
-          cell0 = self._build_encoder_cell(
-              hparams, num_layers, num_residual_layers)
-          cell1 = self._build_encoder_cell(
-              hparams, num_layers, num_residual_layers)
-
-          enc0_outputs, enc0_state = tf.nn.dynamic_rnn(
-              cell0,
-              enc0_emb_inp,
-              dtype=dtype,
-              sequence_length=iterator.trace0_seq_length,
-              time_major=self.time_major,
-              swap_memory=True)
-          enc1_outputs, enc1_state = tf.nn.dynamic_rnn(
-              cell1,
-              enc1_emb_inp,
-              dtype=dtype,
-              sequence_length=iterator.trace1_seq_length,
-              time_major=self.time_major,
-              swap_memory=True)
-
-          encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
-          encoder_state = tf.concat([enc0_state,enc1_state],-1)
+          # alternatively concat forward and backward states
+          encoder_state = []
+          for layer_id in range(num_bi_layers):
+            encoder_state.append(bi_encoder_state[0][layer_id])  # forward
+            encoder_state.append(bi_encoder_state[1][layer_id])  # backward
+          encoder_state = tuple(encoder_state)
+      else:
+        raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
 
     return encoder_outputs, encoder_state
 
@@ -721,3 +676,248 @@ class Model(BaseModel):
       decoder_initial_state = encoder_state
 
     return cell, decoder_initial_state
+
+
+class Model2t(BaseModel): 
+  '''
+  Model for 2-trace-2-encoder architecture
+  '''
+
+  def __init__(self,
+               hparams,
+               mode,
+               iterator,
+               source_vocab_table,
+               target_vocab_table,
+               reverse_target_vocab_table=None,
+               scope=None,
+               extra_args=None):
+    """Create the model.
+
+    Args:
+      hparams: Hyperparameter configurations.
+      mode: TRAIN | EVAL | INFER
+      iterator: Dataset Iterator that feeds data.
+      source_vocab_table: Lookup table mapping source words to ids.
+      target_vocab_table: Lookup table mapping target words to ids.
+      reverse_target_vocab_table: Lookup table mapping ids to target words. Only
+        required in INFER mode. Defaults to None.
+      scope: scope of the model.
+      extra_args: model_helper.ExtraArgs, for passing customizable functions.
+
+    """
+    assert isinstance(iterator, iterator_utils.BatchedInput2t)
+    self.iterator = iterator
+    self.mode = mode
+    self.src_vocab_table = source_vocab_table
+    self.tgt_vocab_table = target_vocab_table
+
+    self.src_vocab_size = hparams.src_vocab_size
+    self.tgt_vocab_size = hparams.tgt_vocab_size
+    self.num_gpus = hparams.num_gpus
+    self.time_major = hparams.time_major
+
+    # extra_args: to make it flexible for adding external customizable code
+    self.single_cell_fn = None
+    if extra_args:
+      self.single_cell_fn = extra_args.single_cell_fn
+
+    # Set num layers
+    self.num_encoder_layers = hparams.num_encoder_layers
+    self.num_decoder_layers = hparams.num_decoder_layers
+    assert self.num_encoder_layers
+    assert self.num_decoder_layers
+
+    # Set num residual layers
+    if hasattr(hparams, "num_residual_layers"):  # compatible common_test_utils
+      self.num_encoder_residual_layers = hparams.num_residual_layers
+      self.num_decoder_residual_layers = hparams.num_residual_layers
+    else:
+      self.num_encoder_residual_layers = hparams.num_encoder_residual_layers
+      self.num_decoder_residual_layers = hparams.num_decoder_residual_layers
+
+    # Initializer
+    initializer = model_helper.get_initializer(
+        hparams.init_op, hparams.random_seed, hparams.init_weight)
+    tf.get_variable_scope().set_initializer(initializer)
+
+    # Embeddings
+    self.init_embeddings(hparams, scope)
+    self.batch_size = tf.size(self.iterator.trace0_sequence_length)
+
+    # Projection
+    with tf.variable_scope(scope or "build_network"):
+      with tf.variable_scope("decoder/output_projection"):
+        self.output_layer = layers_core.Dense(
+            hparams.tgt_vocab_size, use_bias=False, name="output_projection")
+
+    ## Train graph
+    res = self.build_graph(hparams, scope=scope)
+
+    if self.mode == tf.contrib.learn.ModeKeys.TRAIN:
+      self.train_loss = res[1]
+      self.word_count = tf.reduce_sum(
+          self.iterator.trace0_sequence_length) + tf.reduce_sum(self.iterator.trace1_sequence_length) + tf.reduce_sum(
+              self.iterator.target_sequence_length)
+    elif self.mode == tf.contrib.learn.ModeKeys.EVAL:
+      self.eval_loss = res[1]
+    elif self.mode == tf.contrib.learn.ModeKeys.INFER:
+      self.infer_logits, _, self.final_context_state, self.sample_id = res
+      self.sample_words = reverse_target_vocab_table.lookup(
+          tf.to_int64(self.sample_id))
+
+    if self.mode != tf.contrib.learn.ModeKeys.INFER:
+      ## Count the number of predicted words for compute ppl.
+      self.predict_count = tf.reduce_sum(
+          self.iterator.target_sequence_length)
+
+    self.global_step = tf.Variable(0, trainable=False)
+    params = tf.trainable_variables()
+
+    # Gradients and SGD update operation for training the model.
+    # Arrage for the embedding vars to appear at the beginning.
+    if self.mode == tf.contrib.learn.ModeKeys.TRAIN:
+      self.learning_rate = tf.constant(hparams.learning_rate)
+      # warm-up
+      self.learning_rate = self._get_learning_rate_warmup(hparams)
+      # decay
+      self.learning_rate = self._get_learning_rate_decay(hparams)
+
+      # Optimizer
+      if hparams.optimizer == "sgd":
+        opt = tf.train.GradientDescentOptimizer(self.learning_rate)
+        tf.summary.scalar("lr", self.learning_rate)
+      elif hparams.optimizer == "adam":
+        opt = tf.train.AdamOptimizer(self.learning_rate)
+
+      # Gradients
+      gradients = tf.gradients(
+          self.train_loss,
+          params,
+          colocate_gradients_with_ops=hparams.colocate_gradients_with_ops)
+
+      clipped_grads, grad_norm_summary, grad_norm = model_helper.gradient_clip(
+          gradients, max_gradient_norm=hparams.max_gradient_norm)
+      self.grad_norm = grad_norm
+
+      self.update = opt.apply_gradients(
+          zip(clipped_grads, params), global_step=self.global_step)
+
+      # Summary
+      self.train_summary = tf.summary.merge([
+          tf.summary.scalar("lr", self.learning_rate),
+          tf.summary.scalar("train_loss", self.train_loss),
+      ] + grad_norm_summary)
+
+    if self.mode == tf.contrib.learn.ModeKeys.INFER:
+      self.infer_summary = self._get_infer_summary(hparams)
+
+    # Saver
+    self.saver = tf.train.Saver(
+        tf.global_variables(), max_to_keep=hparams.num_keep_ckpts)
+
+    # Print trainable variables
+    utils.print_out("# Trainable variables")
+    for param in params:
+      utils.print_out("  %s, %s, %s" % (param.name, str(param.get_shape()),
+                                        param.op.device))
+
+
+  def build_graph(self, hparams, scope=None):
+    """Subclass must implement this method.
+
+    Creates a sequence-to-sequence model with dynamic RNN decoder API.
+    Args:
+      hparams: Hyperparameter configurations.
+      scope: VariableScope for the created subgraph; default "dynamic_seq2seq".
+
+    Returns:
+      A tuple of the form (logits, loss, final_context_state),
+      where:
+        logits: float32 Tensor [batch_size x num_decoder_symbols].
+        loss: the total loss / batch_size.
+        final_context_state: The final state of decoder RNN.
+
+    Raises:
+      ValueError: if encoder_type differs from mono and bi, or
+        attention_option is not (luong | scaled_luong |
+        bahdanau | normed_bahdanau).
+    """
+    utils.print_out("# creating %s graph ..." % self.mode)
+    dtype = tf.float32
+
+    with tf.variable_scope(scope or "dynamic_seq2seq", dtype=dtype):
+      # Encoder
+      encoder_outputs, encoder_state = self._build_encoder(hparams)
+
+      ## Decoder
+      logits, sample_id, final_context_state = self._build_decoder(
+          encoder_outputs, encoder_state, hparams)
+
+      ## Loss
+      if self.mode != tf.contrib.learn.ModeKeys.INFER:
+        with tf.device(model_helper.get_device_str(self.num_encoder_layers - 1,
+                                                   self.num_gpus)):
+          loss = self._compute_loss(logits)
+      else:
+        loss = None
+
+    return logits, loss, final_context_state, sample_id
+
+
+  def _build_encoder(self, hparams):
+    """Build an encoder."""
+    num_layers = self.num_encoder_layers
+    num_residual_layers = self.num_encoder_residual_layers
+    iterator = self.iterator
+
+    trace0 = iterator.trace0
+    trace1 = iterator.trace1
+    if self.time_major:
+      trace0 = tf.transpose(trace0)
+      trace1 = tf.transpose(trace1)
+
+    with tf.variable_scope("encoder0") as scope:
+      dtype = scope.dtype
+
+      enc0_emb_inp = tf.nn.embedding_lookup(
+          self.embedding_encoder, trace0)
+      
+      if hparams.encoder_type == "uni":   # only test for unidirectional RNN first
+
+        utils.print_out("  Encoder0: num_layers = %d, num_residual_layers=%d" %
+                        (num_layers, num_residual_layers))
+        cell0 = self._build_encoder_cell(
+            hparams, num_layers, num_residual_layers)
+        enc0_outputs, enc0_state = tf.nn.dynamic_rnn(
+            cell0,
+            enc0_emb_inp,
+            dtype=dtype,
+            sequence_length=iterator.trace0_sequence_length,
+            time_major=self.time_major,
+            swap_memory=True)
+
+    with tf.variable_scope("encoder1") as scope:
+      dtype = scope.dtype
+
+      enc1_emb_inp = tf.nn.embedding_lookup(
+          self.embedding_encoder, trace1)
+
+      if hparams.encoder_type == "uni":
+
+        utils.print_out("  Encoder1: num_layers = %d, num_residual_layers=%d" %
+                        (num_layers, num_residual_layers))
+        cell1 = self._build_encoder_cell(
+            hparams, num_layers, num_residual_layers)
+        enc1_outputs, enc1_state = tf.nn.dynamic_rnn(
+            cell1,
+            enc1_emb_inp,
+            dtype=dtype,
+            sequence_length=iterator.trace1_sequence_length,
+            time_major=self.time_major,
+            swap_memory=True)
+
+    encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
+    encoder_state = tf.concat([enc0_state,enc1_state],-1)
+
+    return encoder_outputs, encoder_state
