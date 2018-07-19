@@ -82,6 +82,60 @@ def get_infer_iterator(src_dataset,
       target_sequence_length=None)
 
 
+def get_infer_iterator2t(trace0_dataset,
+                         trace1_dataset,
+                         src_vocab_table,
+                         batch_size,
+                         eos,
+                         src_max_len=None):
+  src_eos_id = tf.cast(src_vocab_table.lookup(tf.constant(eos)), tf.int32)
+  trace0_dataset = trace0_dataset.map(lambda trace0: tf.string_split([trace0]).values)
+  trace1_dataset = trace1_dataset.map(lambda trace1: tf.string_split([trace1]).values)
+
+  src_dataset = tf.data.Dataset.zip((trace0_dataset, trace1_dataset))
+
+  if src_max_len:
+    src_dataset = src_dataset.map(lambda trace0, trace1: (trace0[:src_max_len], trace1[:src_max_len]))
+  # Convert the word strings to ids
+  src_dataset = src_dataset.map(
+      lambda trace0, trace1: (tf.cast(src_vocab_table.lookup(trace0), tf.int32), tf.cast(src_vocab_table.lookup(trace1), tf.int32)))
+  # Add in the word counts.
+  src_dataset = src_dataset.map(lambda trace0, trace1: (trace0, tf.size(trace0), trace1, tf.size(trace1)))
+
+  def batching_func(x):
+    return x.padded_batch(
+        batch_size,
+        # The entry is the source line rows;
+        # this has unknown-length vectors.  The last entry is
+        # the source row size; this is a scalar.
+        padded_shapes=(
+            tf.TensorShape([None]),  # trace0
+            tf.TensorShape([]),  # trace0_len
+            tf.TensorShape([None]),  # trace1
+            tf.TensorShape([])) ,   # trace1_len  
+        # Pad the source sequences with eos tokens.
+        # (Though notice we don't generally need to do this since
+        # later on we will be masking out calculations past the true sequence.
+        padding_values=(
+            src_eos_id,  # trace0
+            0,   # trace0_len -- unused
+            src_eos_id,  # trace1
+            0))  # trace1_len -- unused
+
+  batched_dataset = batching_func(src_dataset)
+  batched_iter = batched_dataset.make_initializable_iterator()
+  (trace0_ids, trace0_seq_len, trace1_ids, trace1_seq_len) = batched_iter.get_next()
+  return BatchedInput2t(
+      initializer=batched_iter.initializer,
+      trace0=trace0_ids,
+      trace1=trace1_ids,
+      target_input=None,
+      target_output=None,
+      trace0_sequence_length=trace0_seq_len,
+      trace1_sequence_length=trace1_seq_len,
+      target_sequence_length=None)
+
+
 def get_iterator(src_dataset,
                  tgt_dataset,
                  src_vocab_table,

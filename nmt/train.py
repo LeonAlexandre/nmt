@@ -47,10 +47,19 @@ def run_sample_decode(infer_model, infer_sess, model_dir, hparams,
     loaded_infer_model, global_step = model_helper.create_or_load_model(
         infer_model.model, model_dir, infer_sess, "infer")
 
-  _sample_decode(loaded_infer_model, global_step, infer_sess, hparams,
-                 infer_model.iterator, src_data, tgt_data,
-                 infer_model.src_placeholder,
-                 infer_model.batch_size_placeholder, summary_writer)
+  if hparams.num_traces == 1:
+    _sample_decode(loaded_infer_model, global_step, infer_sess, hparams,
+                   infer_model.iterator, src_data, tgt_data,
+                   summary_writer=summary_writer,
+                   iterator_batch_size_placeholder=infer_model.batch_size_placeholder, 
+                   itereator_src_placeholder=infer_model.src_placeholder)
+  else:
+    _sample_decode(loaded_infer_model, global_step, infer_sess, hparams,
+                   infer_model.iterator, src_data, tgt_data,
+                   summary_writer=summary_writer,
+                   iterator_batch_size_placeholder=infer_model.batch_size_placeholder,
+                   iterator_trace0_placeholder=infer_model.trace0_placeholder,
+                   iterator_trace1_placeholder=infer_model.trace1_placeholder)
 
 
 def run_internal_eval(
@@ -61,24 +70,44 @@ def run_internal_eval(
     loaded_eval_model, global_step = model_helper.create_or_load_model(
         eval_model.model, model_dir, eval_sess, "eval")
 
-  dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
   dev_tgt_file = "%s.%s" % (hparams.dev_prefix, hparams.tgt)
-  dev_eval_iterator_feed_dict = {
-      eval_model.src_file_placeholder: dev_src_file,
-      eval_model.tgt_file_placeholder: dev_tgt_file
-  }
+
+  if hparams.num_traces == 1:
+    dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
+    dev_eval_iterator_feed_dict = {
+        eval_model.src_file_placeholder: dev_src_file,
+        eval_model.tgt_file_placeholder: dev_tgt_file
+    }
+  else:
+    dev_trace0_file = "%s.%s" % (hparams.dev_prefix, hparams.trace0)
+    dev_trace1_file = "%s.%s" % (hparams.dev_prefix, hparams.trace1)
+    dev_eval_iterator_feed_dict = {
+        eval_model.trace0_file_placeholder: dev_trace0_file,
+        eval_model.trace1_file_placeholder: dev_trace1_file,
+        eval_model.tgt_file_placeholder: dev_tgt_file
+    }
 
   dev_ppl = _internal_eval(loaded_eval_model, global_step, eval_sess,
                            eval_model.iterator, dev_eval_iterator_feed_dict,
                            summary_writer, "dev")
   test_ppl = None
   if use_test_set and hparams.test_prefix:
-    test_src_file = "%s.%s" % (hparams.test_prefix, hparams.src)
     test_tgt_file = "%s.%s" % (hparams.test_prefix, hparams.tgt)
-    test_eval_iterator_feed_dict = {
-        eval_model.src_file_placeholder: test_src_file,
-        eval_model.tgt_file_placeholder: test_tgt_file
-    }
+    if hparams.num_traces == 1:
+      test_src_file = "%s.%s" % (hparams.test_prefix, hparams.src)
+      test_eval_iterator_feed_dict = {
+          eval_model.src_file_placeholder: test_src_file,
+          eval_model.tgt_file_placeholder: test_tgt_file
+      }
+    else:
+      test_trace0_file = "%s.%s" % (hparams.test_prefix, hparams.trace0)
+      test_trace1_file = "%s.%s" % (hparams.test_prefix, hparams.trace1)
+      test_eval_iterator_feed_dict = {
+          eval_model.trace0_file_placeholder: test_trace0_file,
+          eval_model.trace1_file_placeholder: test_trace1_file,
+          eval_model.tgt_file_placeholder: test_tgt_file
+      }
+
     test_ppl = _internal_eval(loaded_eval_model, global_step, eval_sess,
                               eval_model.iterator, test_eval_iterator_feed_dict,
                               summary_writer, "test")
@@ -93,12 +122,23 @@ def run_external_eval(infer_model, infer_sess, model_dir, hparams,
     loaded_infer_model, global_step = model_helper.create_or_load_model(
         infer_model.model, model_dir, infer_sess, "infer")
 
-  dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
   dev_tgt_file = "%s.%s" % (hparams.dev_prefix, hparams.tgt)
-  dev_infer_iterator_feed_dict = {
-      infer_model.src_placeholder: inference.load_data(dev_src_file),
-      infer_model.batch_size_placeholder: hparams.infer_batch_size,
-  }
+
+  if hparams.num_traces == 1:
+    dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
+    dev_infer_iterator_feed_dict = {
+        infer_model.src_placeholder: inference.load_data(dev_src_file),
+        infer_model.batch_size_placeholder: hparams.infer_batch_size,
+    }
+  else:
+    dev_trace0_file = "%s.%s" % (hparams.dev_prefix, hparams.trace0)
+    dev_trace1_file = "%s.%s" % (hparams.dev_prefix, hparams.trace1)
+    dev_infer_iterator_feed_dict = {
+        infer_model.trace0_placeholder: inference.load_data(dev_trace0_file),
+        infer_model.trace1_placeholder: inference.load_data(dev_trace0_file),
+        infer_model.batch_size_placeholder: hparams.infer_batch_size,
+    }
+
   dev_scores = _external_eval(
       loaded_infer_model,
       global_step,
@@ -114,12 +154,24 @@ def run_external_eval(infer_model, infer_sess, model_dir, hparams,
 
   test_scores = None
   if use_test_set and hparams.test_prefix:
-    test_src_file = "%s.%s" % (hparams.test_prefix, hparams.src)
+
     test_tgt_file = "%s.%s" % (hparams.test_prefix, hparams.tgt)
-    test_infer_iterator_feed_dict = {
-        infer_model.src_placeholder: inference.load_data(test_src_file),
-        infer_model.batch_size_placeholder: hparams.infer_batch_size,
-    }
+
+    if hparams.num_traces == 1:
+      test_src_file = "%s.%s" % (hparams.test_prefix, hparams.src)
+      test_infer_iterator_feed_dict = {
+          infer_model.src_placeholder: inference.load_data(test_src_file),
+          infer_model.batch_size_placeholder: hparams.infer_batch_size,
+      }
+    else:
+      test_trace0_file = "%s.%s" % (hparams.test_prefix, hparams.trace0)
+      test_trace1_file = "%s.%s" % (hparams.test_prefix, hparams.trace1)
+      test_infer_iterator_feed_dict = {
+          infer_model.trace0_placeholder: inference.load_data(test_trace0_file),
+          infer_model.trace1_placeholder: inference.load_data(test_trace1_file),
+          infer_model.batch_size_placeholder: hparams.infer_batch_size,
+      }
+
     test_scores = _external_eval(
         loaded_infer_model,
         global_step,
@@ -302,9 +354,17 @@ def train(hparams, scope=None, target_session=""):
   infer_model = model_helper.create_infer_model(model_creator, hparams, scope)
 
   # Preload data for sample decoding.
-  dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
+  if hparams.num_traces == 1:
+    dev_src_file = "%s.%s" % (hparams.dev_prefix, hparams.src)
+    sample_src_data = inference.load_data(dev_src_file)
+  else:
+    dev_trace0_file = "%s.%s" % (hparams.dev_prefix, hparams.trace0)
+    dev_trace1_file = "%s.%s" % (hparams.dev_prefix, hparams.trace1)
+    sample_trace0_data = inference.load_data(dev_trace0_file)
+    sample_trace1_data = inference.load_data(dev_trace0_file)
+    sample_src_data = tuple([sample_trace0_data,sample_trace1_data])
+
   dev_tgt_file = "%s.%s" % (hparams.dev_prefix, hparams.tgt)
-  sample_src_data = inference.load_data(dev_src_file)
   sample_tgt_data = inference.load_data(dev_tgt_file)
 
   summary_name = "train_log"
@@ -501,17 +561,31 @@ def _internal_eval(model, global_step, sess, iterator, iterator_feed_dict,
   return ppl
 
 
-def _sample_decode(model, global_step, sess, hparams, iterator, src_data,
-                   tgt_data, iterator_src_placeholder,
-                   iterator_batch_size_placeholder, summary_writer):
+def _sample_decode(model, global_step, sess, hparams, iterator, src_data, tgt_data, summary_writer,
+                   iterator_batch_size_placeholder,
+                   iterator_src_placeholder=None, 
+                   iterator_trace0_placeholder=None, 
+                   iterator_trace1_placeholder=None):
   """Pick a sentence and decode."""
-  decode_id = random.randint(0, len(src_data) - 1)
+  if hparams.num_traces == 1:
+    decode_id = random.randint(0, len(src_data) - 1)
+  else:
+    decode_id = random.randint(0, len(src_data[0]) - 1)
   utils.print_out("  # %d" % decode_id)
 
-  iterator_feed_dict = {
-      iterator_src_placeholder: [src_data[decode_id]],
-      iterator_batch_size_placeholder: 1,
-  }
+  if hparams.num_traces == 1:
+    iterator_feed_dict = {
+        iterator_src_placeholder: [src_data[decode_id]],
+        iterator_batch_size_placeholder: 1,
+    }
+  else:
+    trace0_data = src_data[0]
+    trace1_data = src_data[1]
+    iterator_feed_dict = {
+        iterator_trace0_placeholder: [trace0_data[decode_id]],
+        iterator_trace1_placeholder: [trace1_data[decode_id]],
+        iterator_batch_size_placeholder: 1,
+    }
   sess.run(iterator.initializer, feed_dict=iterator_feed_dict)
 
   nmt_outputs, attention_summary = model.decode(sess)
@@ -525,7 +599,12 @@ def _sample_decode(model, global_step, sess, hparams, iterator, src_data,
       sent_id=0,
       tgt_eos=hparams.eos,
       subword_option=hparams.subword_option)
-  utils.print_out("    src: %s" % src_data[decode_id])
+
+  if hparams.num_traces == 1:
+    utils.print_out("    src: %s" % src_data[decode_id])
+  else:
+    utils.print_out("    trace0: %s" % trace0_data[decode_id])
+    utils.print_out("    trace1: %s" % trace1_data[decode_id])
   utils.print_out("    ref: %s" % tgt_data[decode_id])
   utils.print_out(b"    nmt: " + translation)
 
