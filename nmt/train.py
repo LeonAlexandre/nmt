@@ -361,7 +361,7 @@ def train(hparams, scope=None, target_session=""):
     dev_trace0_file = "%s.%s" % (hparams.dev_prefix, hparams.trace0)
     dev_trace1_file = "%s.%s" % (hparams.dev_prefix, hparams.trace1)
     sample_trace0_data = inference.load_data(dev_trace0_file)
-    sample_trace1_data = inference.load_data(dev_trace0_file)
+    sample_trace1_data = inference.load_data(dev_trace1_file)
     sample_src_data = tuple([sample_trace0_data,sample_trace1_data])
 
   dev_tgt_file = "%s.%s" % (hparams.dev_prefix, hparams.tgt)
