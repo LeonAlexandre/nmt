@@ -1,0 +1,3 @@
+# log_file=./nmt/temp/Benchmark20_2encoder_adam_0.0001/model0.5/log_1532107687
+# Start step 40000, lr 0.0001, Fri Jul 20 17:28:13 2018
+# Final, step 40000 lr 0.0001 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 95.50, dev edit_distance 6.0, dev hamming_distance 8.6, test ppl 93.64, test edit_distance 5.8, test hamming_distance 8.5, Fri Jul 20 17:28:17 2018
