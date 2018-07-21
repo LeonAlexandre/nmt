@@ -961,8 +961,16 @@ class Model2t(BaseModel):
     #encoder_state = tf.concat([enc0_state,enc1_state],-1)
 
     print("Enc0 layer0 c: " + str(enc0_state[0][0]))
-    print("Enc0 layer1 h: " + str(enc0_state[0][1]))
+    print("Enc0 layer0 h: " + str(enc0_state[0][1]))
 
+    layer_states = []
+
+    for layer in range(hparams.num_layers):
+      cat_c = tf.concat([enc0_state[layer][0],enc1_state[layer][0]],-1)
+      cat_h = tf.concat([enc0_state[layer][1],enc1_state[layer][1]],-1)
+      layer_states.append(tf.nn.rnn_cell.LSTMStateTuple(cat_c,cat_h))
+
+    '''
     # Layer 0
     cat_c0 = tf.concat([enc0_state[0][0],enc1_state[0][0]],-1)
     print("Concat encoder c0: " + str(cat_c0))
@@ -978,8 +986,9 @@ class Model2t(BaseModel):
     print("Concat encoder h1: " + str(cat_h1))
     layer1_state = tf.nn.rnn_cell.LSTMStateTuple(cat_c1,cat_h1)
     print("Concat layer0 state: " + str(layer0_state))
+    '''
 
-    encoder_state = tuple([layer0_state,layer1_state])
+    encoder_state = tuple(layer_states)
 
     print("Concat encoder outputs: " + str(encoder_outputs))
     print("Concat encoder state: " + str(encoder_state))

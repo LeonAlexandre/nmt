@@ -37,6 +37,13 @@ class BatchedInput2t(
                             "target_sequence_length"))):
   pass
 
+class BatchedInputNt(
+    collections.namedtuple("BatchedInputNt",
+                           ("initializer", "traces", "target_input",
+                            "target_output", "traces_sequence_length",
+                            "target_sequence_length"))):
+  pass
+
 
 def get_infer_iterator(src_dataset,
                        src_vocab_table,

@@ -52,7 +52,7 @@ def run_sample_decode(infer_model, infer_sess, model_dir, hparams,
                    infer_model.iterator, src_data, tgt_data,
                    summary_writer=summary_writer,
                    iterator_batch_size_placeholder=infer_model.batch_size_placeholder, 
-                   itereator_src_placeholder=infer_model.src_placeholder)
+                   iterator_src_placeholder=infer_model.src_placeholder)
   else:
     _sample_decode(loaded_infer_model, global_step, infer_sess, hparams,
                    infer_model.iterator, src_data, tgt_data,
