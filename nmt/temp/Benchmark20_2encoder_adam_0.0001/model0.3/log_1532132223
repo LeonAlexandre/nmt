@@ -481,4 +481,25 @@
   step 47900 lr 0.0001 step-time 0.45s wps 13.56K ppl 1.01 gN 10.74 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:29:52 2018
   step 48000 lr 0.0001 step-time 0.48s wps 12.81K ppl 1.01 gN 10.62 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:30:39 2018
   step 48100 lr 0.0001 step-time 0.48s wps 12.86K ppl 1.01 gN 11.35 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:31:36 2018
-  step 48200 lr 0.0001 step-time 0.46s wps 13.35K ppl 1.01 gN 10.52 edit_distance 4.83,
+  step 48200 lr 0.0001 step-time 0.46s wps 13.35K ppl 1.01 gN 10.52 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:32:22 2018
+  step 48300 lr 0.0001 step-time 0.46s wps 13.27K ppl 1.01 gN 11.04 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:33:08 2018
+  step 48400 lr 0.0001 step-time 0.46s wps 13.41K ppl 1.01 gN 11.29 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:33:54 2018
+  step 48500 lr 0.0001 step-time 0.45s wps 13.59K ppl 1.01 gN 11.88 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:34:39 2018
+  step 48600 lr 0.0001 step-time 0.45s wps 13.45K ppl 1.01 gN 10.55 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:35:29 2018
+  step 48700 lr 0.0001 step-time 0.45s wps 13.76K ppl 1.01 gN 10.90 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:36:14 2018
+  step 48800 lr 0.0001 step-time 0.45s wps 13.68K ppl 1.01 gN 10.43 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:36:58 2018
+  step 48900 lr 0.0001 step-time 0.45s wps 13.53K ppl 1.01 gN 10.10 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:37:44 2018
+  step 49000 lr 0.0001 step-time 0.45s wps 13.50K ppl 1.01 gN 11.36 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:38:29 2018
+  step 49100 lr 0.0001 step-time 0.45s wps 13.60K ppl 1.01 gN 10.40 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:39:23 2018
+  step 49200 lr 0.0001 step-time 0.44s wps 13.78K ppl 1.01 gN 10.50 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:40:07 2018
+  step 49300 lr 0.0001 step-time 0.46s wps 13.30K ppl 1.01 gN 10.95 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:40:53 2018
+  step 49400 lr 0.0001 step-time 0.46s wps 13.37K ppl 1.00 gN 10.24 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:41:39 2018
+  step 49500 lr 0.0001 step-time 0.46s wps 13.43K ppl 1.00 gN 9.95 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:42:24 2018
+  step 49600 lr 0.0001 step-time 0.46s wps 13.38K ppl 1.00 gN 10.55 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:43:15 2018
+  step 49700 lr 0.0001 step-time 0.45s wps 13.66K ppl 1.00 gN 10.49 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:44:00 2018
+  step 49800 lr 0.0001 step-time 0.37s wps 16.40K ppl 1.00 gN 10.07 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:44:37 2018
+  step 49900 lr 0.0001 step-time 0.32s wps 19.37K ppl 1.00 gN 10.67 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:45:09 2018
+  step 50000 lr 0.0001 step-time 0.44s wps 13.86K ppl 1.01 gN 10.77 edit_distance 4.83, hamming_distance 6.80, Sat Jul 21 06:45:53 2018
+# Final, step 50000 lr 0.0001 step-time 0.44s wps 13.86K ppl 1.01 gN 10.77 dev ppl 38.67, dev edit_distance 4.9, dev hamming_distance 7.3, test ppl 40.25, test edit_distance 4.6, test hamming_distance 7.3, Sat Jul 21 06:46:09 2018
+# Best edit_distance, step 47000 lr 0.0001 step-time 0.44s wps 13.86K ppl 1.01 gN 10.77 dev ppl 35.54, dev edit_distance 4.8, dev hamming_distance 7.2, test ppl 38.09, test edit_distance 4.7, test hamming_distance 7.3, Sat Jul 21 06:46:16 2018
+# Best hamming_distance, step 0 lr 0.0001 step-time 0.44s wps 13.86K ppl 1.01 gN 10.77 dev ppl 5.01, dev edit_distance 90.7, dev hamming_distance 16.4, test ppl 5.01, test edit_distance 88.2, test hamming_distance 16.4, Sat Jul 21 06:46:25 2018
