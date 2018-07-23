@@ -188,7 +188,7 @@ class AttentionModel2t(model.Model2t):
     if attention_architecture != "standard":
       raise ValueError(
           "Unknown attention architecture %s" % attention_architecture)
-
+    #changed shape to fit multiple encoders
     num_units = hparams.num_units
     num_layers = self.num_decoder_layers
     num_residual_layers = self.num_decoder_residual_layers
