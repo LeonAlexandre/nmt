@@ -932,8 +932,38 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace0_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-    print("enc0 outputs: " + str(enc0_outputs))
-    print("enc0 state: " + str(enc0_state))
+        print("enc0 outputs: " + str(enc0_outputs))
+        print("enc0 state: " + str(enc0_state))
+
+      elif hparams.encoder_type == "bi":
+        num_bi_layers = int(num_layers / 2)
+        num_bi_residual_layers = int(num_residual_layers / 2)
+        utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
+                        (num_bi_layers, num_bi_residual_layers))
+
+        enc0_outputs, bi_enc0_state = (
+            self._build_bidirectional_rnn(
+                inputs=enc0_emb_inp,
+                sequence_length=iterator.trace0_sequence_length,
+                dtype=dtype,
+                hparams=hparams,
+                num_bi_layers=num_bi_layers,
+                num_bi_residual_layers=num_bi_residual_layers))
+
+        if num_bi_layers == 1:
+          enc0_state = bi_enc0_state
+        else:
+          # alternatively concat forward and backward states
+          enc0_state = []
+          for layer_id in range(num_bi_layers):
+            enc0_state.append(bi_enc0_state[0][layer_id])  # forward
+            enc0_state.append(bi_enc0_state[1][layer_id])  # backward
+          enc0_state = tuple(enc0_state)
+
+        print("enc0 outputs: " + str(enc0_outputs))
+        print("enc0 state: " + str(enc0_state))
+      else:
+        raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
 
     with tf.variable_scope("encoder1") as scope:
       dtype = scope.dtype
@@ -954,8 +984,34 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace1_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-      print("enc1 outputs: " + str(enc1_outputs))
-      print("enc1 state: " + str(enc1_state))
+
+      elif hparams.encoder_type == "bi":
+        num_bi_layers = int(num_layers / 2)
+        num_bi_residual_layers = int(num_residual_layers / 2)
+        utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
+                        (num_bi_layers, num_bi_residual_layers))
+
+        enc1_outputs, bi_enc1_state = (
+            self._build_bidirectional_rnn(
+                inputs=enc1_emb_inp,
+                sequence_length=iterator.trace0_sequence_length,
+                dtype=dtype,
+                hparams=hparams,
+                num_bi_layers=num_bi_layers,
+                num_bi_residual_layers=num_bi_residual_layers))
+
+        if num_bi_layers == 1:
+          enc1_state = bi_enc1_state
+        else:
+          # alternatively concat forward and backward states
+          enc1_state = []
+          for layer_id in range(num_bi_layers):
+            enc1_state.append(bi_enc1_state[0][layer_id])  # forward
+            enc1_state.append(bi_enc1_state[1][layer_id])  # backward
+          enc1_state = tuple(enc1_state)
+      else:
+        raise ValueError("Unknown encoder_type %s" % hparams.encoder_type)
+
 
     encoder_outputs = tf.concat([enc0_outputs,enc1_outputs],-1)
     #encoder_state = tf.concat([enc0_state,enc1_state],-1)
@@ -1116,3 +1172,44 @@ class Model2t(BaseModel):
           sample_id = outputs.sample_id
 
     return logits, sample_id, final_context_state
+
+  def _build_bidirectional_rnn(self, inputs, sequence_length,
+                               dtype, hparams,
+                               num_bi_layers,
+                               num_bi_residual_layers,
+                               base_gpu=0):
+    """Create and call biddirectional RNN cells.
+
+    Args:
+      num_residual_layers: Number of residual layers from top to bottom. For
+        example, if `num_bi_layers=4` and `num_residual_layers=2`, the last 2 RNN
+        layers in each RNN cell will be wrapped with `ResidualWrapper`.
+      base_gpu: The gpu device id to use for the first forward RNN layer. The
+        i-th forward RNN layer will use `(base_gpu + i) % num_gpus` as its
+        device id. The `base_gpu` for backward RNN cell is `(base_gpu +
+        num_bi_layers)`.
+
+    Returns:
+      The concatenated bidirectional output and the bidirectional RNN cell"s
+      state.
+    """
+    # Construct forward and backward cells
+    fw_cell = self._build_encoder_cell(hparams,
+                                       num_bi_layers,
+                                       num_bi_residual_layers,
+                                       base_gpu=base_gpu)
+    bw_cell = self._build_encoder_cell(hparams,
+                                       num_bi_layers,
+                                       num_bi_residual_layers,
+                                       base_gpu=(base_gpu + num_bi_layers))
+
+    bi_outputs, bi_state = tf.nn.bidirectional_dynamic_rnn(
+        fw_cell,
+        bw_cell,
+        inputs,
+        dtype=dtype,
+        sequence_length=sequence_length,
+        time_major=self.time_major,
+        swap_memory=True)
+
+    return tf.concat(bi_outputs, -1), bi_state
