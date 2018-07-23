@@ -14,8 +14,32 @@ git commit -m "completed benchmark20 2 encoder 0.2"
 git push
 
 
-Old model encoder outputs: Tensor("dynamic_seq2seq/encoder/rnn/TensorArrayStack/TensorArrayGatherV3:0", shape=(?, ?, 128), dtype=float32)
-Old model encoder state: (LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_3:0' shape=(?, 128) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_4:0' shape=(?, 128) dtype=float32>), LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_5:0' shape=(?, 128) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_6:0' shape=(?, 128) dtype=float32>))
+src_tgt_dataset shapes 2-encoder (hard code):
 
-Concat encoder outputs: Tensor("dynamic_seq2seq/concat:0", shape=(?, ?, 256), dtype=float32)
-Concat encoder state: ([LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_1:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_2:0' shape=(?, 256) dtype=float32>), LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_3:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_4:0' shape=(?, 256) dtype=float32>)],)
+src_tgt_dataset after zip: <ZipDataset shapes: ((), (), ()), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset before split: <ShuffleDataset shapes: ((), (), ()), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after split: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after zero len filter: <FilterDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after src_max_len cutoff: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after tgt_max_len cutoff: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after vocab lookup: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32)>
+src_tgt_dataset after tgt prefix/suffix: <PrefetchDataset shapes: ((?,), (?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32, tf.int32)>
+src_tgt_dataset after adding seq lens: <PrefetchDataset shapes: ((?,), (?,), (?,), (?,), (), (), ()), types: (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32)>
+batched_dataset: <PaddedBatchDataset shapes: ((?, ?), (?, ?), (?, ?), (?, ?), (?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32)>
+batched_iter: <tensorflow.python.data.ops.iterator_ops.Iterator object at 0x7f0a656eb748>
+BatchedInputIter: BatchedInput2t(initializer=<tf.Operation 'MakeIterator' type=MakeIterator>, trace0=<tf.Tensor 'IteratorGetNext:0' shape=(?, ?) dtype=int32>, trace1=<tf.Tensor 'IteratorGetNext:1' shape=(?, ?) dtype=int32>, target_input=<tf.Tensor 'IteratorGetNext:2' shape=(?, ?) dtype=int32>, target_output=<tf.Tensor 'IteratorGetNext:3' shape=(?, ?) dtype=int32>, trace0_sequence_length=<tf.Tensor 'IteratorGetNext:4' shape=(?,) dtype=int32>, trace1_sequence_length=<tf.Tensor 'IteratorGetNext:5' shape=(?,) dtype=int32>, target_sequence_length=<tf.Tensor 'IteratorGetNext:6' shape=(?,) dtype=int32>)
+
+src_tgt_dataset shapes N-encoder (N=2):
+
+src_tgt_dataset after zip: <ZipDataset shapes: ((), (), ()), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset before split: <ShuffleDataset shapes: ((), (), ()), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after split: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after zero len filter: <FilterDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after src_max_len cutoff: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after tgt_max_len cutoff: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.string, tf.string, tf.string)>
+src_tgt_dataset after vocab lookup: <PrefetchDataset shapes: ((?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32)>
+src_tgt_dataset after tgt prefix/suffix: <PrefetchDataset shapes: ((?,), (?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32, tf.int32)>
+src_tgt_dataset after adding seq lens: <PrefetchDataset shapes: ((?,), (?,), (?,), (?,), (), (), ()), types: (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32)>
+batched_dataset: <PaddedBatchDataset shapes: ((?, ?), (?, ?), (?, ?), (?, ?), (?,), (?,), (?,)), types: (tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32, tf.int32)>
+batched_iter: <tensorflow.python.data.ops.iterator_ops.Iterator object at 0x7f5994e9a518>
+BatchedInputIter: BatchedInput2t(initializer=<tf.Operation 'MakeIterator' type=MakeIterator>, trace0=<tf.Tensor 'IteratorGetNext:0' shape=(?, ?) dtype=int32>, trace1=<tf.Tensor 'IteratorGetNext:1' shape=(?, ?) dtype=int32>, target_input=<tf.Tensor 'IteratorGetNext:2' shape=(?, ?) dtype=int32>, target_output=<tf.Tensor 'IteratorGetNext:3' shape=(?, ?) dtype=int32>, trace0_sequence_length=<tf.Tensor 'IteratorGetNext:4' shape=(?,) dtype=int32>, trace1_sequence_length=<tf.Tensor 'IteratorGetNext:5' shape=(?,) dtype=int32>, target_sequence_length=<tf.Tensor 'IteratorGetNext:6' shape=(?,) dtype=int32>)
