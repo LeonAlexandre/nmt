@@ -344,7 +344,10 @@ def train(hparams, scope=None, target_session=""):
         hparams.attention_architecture in ["gnmt", "gnmt_v2"]):
       model_creator = gnmt_model.GNMTModel
     elif hparams.attention_architecture == "standard":
-      model_creator = attention_model.AttentionModel
+      if hparams.num_traces == 1: 
+        model_creator = attention_model.AttentionModel
+      else:
+        model_creator = attention_model.AttentionModel2t
     else:
       raise ValueError("Unknown attention architecture %s" %
                        hparams.attention_architecture)
@@ -423,7 +426,6 @@ def train(hparams, scope=None, target_session=""):
       """
       run_sample_decode(infer_model, infer_sess, model_dir, hparams, summary_writer, sample_src_data, sample_tgt_data)
       run_external_eval(infer_model, infer_sess, model_dir, hparams, summary_writer)
-
       if avg_ckpts:
         run_avg_external_eval(infer_model, infer_sess, model_dir, hparams,
                               summary_writer, global_step)
