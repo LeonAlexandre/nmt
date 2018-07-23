@@ -104,7 +104,7 @@ def create_train_model(
           num_shards=num_workers,
           shard_index=jobid)
 
-    else:   # 2 traces
+    elif hparams.num_traces == 2:   # 2 traces
 
       trace0_file = "%s.%s" % (hparams.train_prefix, hparams.trace0)
       trace1_file = "%s.%s" % (hparams.train_prefix, hparams.trace1)
@@ -130,7 +130,35 @@ def create_train_model(
           tgt_max_len=hparams.tgt_max_len,
           skip_count=skip_count_placeholder,
           num_shards=num_workers,
-          shard_index=jobid)
+          shard_index=jobid,
+          hparams=hparams)
+
+    else:
+
+      traces_dataset = []
+      for i in range(hparams.num_traces):
+        traces_dateset.append(tf.data.TextLineDataset("%s.trace%s" % (hparams.train_prefix, str(i))))
+      traces_dateset = tuple(traces_dataset)
+      tgt_dataset = tf.data.TextLineDataset("%s.%s" % (hparams.train_prefix, hparams.tgt))
+
+      skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
+
+      iterator = iterator_utils.get_iteratorNt(
+          traces_dataset,
+          tgt_dataset,
+          src_vocab_table,
+          tgt_vocab_table,
+          batch_size=hparams.batch_size,
+          sos=hparams.sos,
+          eos=hparams.eos,
+          random_seed=hparams.random_seed,
+          num_buckets=hparams.num_buckets,
+          src_max_len=hparams.src_max_len,
+          tgt_max_len=hparams.tgt_max_len,
+          skip_count=skip_count_placeholder,
+          num_shards=num_workers,
+          shard_index=jobid,
+          hparams=hparams)
 
     # Note: One can set model_device_fn to
     # `tf.train.replica_device_setter(ps_tasks)` for distributed training.
@@ -216,7 +244,8 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
           random_seed=hparams.random_seed,
           num_buckets=hparams.num_buckets,
           src_max_len=hparams.src_max_len,
-          tgt_max_len=hparams.tgt_max_len)
+          tgt_max_len=hparams.tgt_max_len,
+          hparams=hparams)
 
     model = model_creator(
         hparams,
@@ -283,7 +312,7 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
           eos=hparams.eos,
           src_max_len=hparams.src_max_len_infer)
 
-    else:   # 2 traces
+    elif hparams.num_traces == 2:   # 2 traces
 
       trace0_placeholder = tf.placeholder(shape=[None], dtype=tf.string)
       trace1_placeholder = tf.placeholder(shape=[None], dtype=tf.string)
@@ -298,7 +327,25 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
           src_vocab_table,
           batch_size=batch_size_placeholder,
           eos=hparams.eos,
-          src_max_len=hparams.src_max_len_infer)
+          src_max_len=hparams.src_max_len_infer,
+          hparams=hparams)
+
+    else: # N traces
+
+      traces_placeholder = []
+      for i in range(hparams.num_traces):
+        traces_placeholder.append(tf.placeholder(shape=[None], dtype=sf.string))
+      batch_size_placeholder = tf.placeholder(shape=[], dtype=tf.int64)
+      traces_dataset = tf.data.Dataset.from_tensor_slices(traces_placeholder)
+
+      iterator = iterator_utils.get_infer_iteratorNt(
+          traces_dataset,
+          src_vocab_table,
+          batch_size=batch_size_placeholder,
+          eos=hparams.eos,
+          src_max_len=hparams.src_max_len_infer,
+          hparams=hparams) 
+
 
     model = model_creator(
           hparams,
@@ -317,12 +364,19 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
       src_placeholder=src_placeholder,
       batch_size_placeholder=batch_size_placeholder,
       iterator=iterator)
-  else:
+  elif hparams.num_traces == 2:
     return InferModel2t(
       graph=graph,
       model=model,
       trace0_placeholder=trace0_placeholder,
       trace1_placeholder=trace1_placeholder,
+      batch_size_placeholder=batch_size_placeholder,
+      iterator=iterator)
+  else:
+    return InferModelNt(
+      graph=graph,
+      model=model,
+      traces_placeholder=traces_placeholder,
       batch_size_placeholder=batch_size_placeholder,
       iterator=iterator)
 
