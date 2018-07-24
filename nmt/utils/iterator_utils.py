@@ -107,7 +107,7 @@ def get_infer_iterator2t(trace0_dataset,
   traces_dataset = tuple([trace0_dataset,trace1_dataset])
 
   src_dataset = tf.data.Dataset.zip(traces_dataset)
-  print("Infer dataset after zip: " + str(src_dataset))
+  #print("Infer dataset after zip: " + str(src_dataset))
 
   def varg_string_split(*x):
     strings = []
@@ -128,7 +128,7 @@ def get_infer_iterator2t(trace0_dataset,
   if src_max_len:
     src_dataset = src_dataset.map(lambda *x: varg_len_cutoff(x, max_len=src_max_len))
     #src_dataset = src_dataset.map(lambda trace0, trace1: (trace0[:src_max_len], trace1[:src_max_len]))
-    print("Infer dataset after len cutoff")
+    #print("Infer dataset after len cutoff")
 
   # Convert the word strings to ids
   #src_dataset = src_dataset.map(
@@ -141,7 +141,7 @@ def get_infer_iterator2t(trace0_dataset,
       lookup_results.append(tf.cast(src_vocab_table.lookup(i), tf.int32))
     return tuple(lookup_results)
   src_dataset = src_dataset.map(lambda *x: varg_vocab_lookup(x))
-  print("Infer dataset after vocab lookup: " + str(src_dataset))
+  #print("Infer dataset after vocab lookup: " + str(src_dataset))
   # Add in the word counts.
   #src_dataset = src_dataset.map(lambda trace0, trace1: (trace0, tf.size(trace0), trace1, tf.size(trace1)))
   
@@ -152,7 +152,7 @@ def get_infer_iterator2t(trace0_dataset,
       sizes.append(tf.size(i))
     return tuple(sizes)
   src_dataset = src_dataset.map(lambda *x: (*(x),*(varg_get_size(x))))
-  print("Infer dataset after adding in seq length: " + str(src_dataset))
+  #print("Infer dataset after adding in seq length: " + str(src_dataset))
 
   def batching_func(x):
     
@@ -198,9 +198,9 @@ def get_infer_iterator2t(trace0_dataset,
     
 
   batched_dataset = batching_func(src_dataset)
-  print("Batched infer dataset: " + str(batched_dataset))
+  #print("Batched infer dataset: " + str(batched_dataset))
   batched_iter = batched_dataset.make_initializable_iterator()
-  print("Batched infer iter: " + str(batched_iter))
+  #print("Batched infer iter: " + str(batched_iter))
   (trace0_ids, trace1_ids, trace0_seq_len, trace1_seq_len) = batched_iter.get_next()
   return BatchedInput2t(
       initializer=batched_iter.initializer,
@@ -222,7 +222,8 @@ def get_infer_iteratorNt(traces_dataset,
   src_eos_id = tf.cast(src_vocab_table.lookup(tf.constant(eos)), tf.int32)
 
   src_dataset = tf.data.Dataset.zip(traces_dataset)
-  print("Infer dataset after zip: " + str(src_dataset))
+  
+  #print("Infer dataset after zip: " + str(src_dataset))
 
   def varg_string_split(*x):
     strings = []
@@ -233,7 +234,7 @@ def get_infer_iteratorNt(traces_dataset,
     return tuple(strings)
 
   src_dataset = src_dataset.map(lambda *x: varg_string_split(x))
-  print("Infer dataset after split: " + str(src_dataset))
+  #print("Infer dataset after split: " + str(src_dataset))
 
   def varg_len_cutoff(*x, max_len):
     results = []
@@ -243,7 +244,7 @@ def get_infer_iteratorNt(traces_dataset,
 
   if src_max_len:
     src_dataset = src_dataset.map(lambda *x: varg_len_cutoff(x, max_len=src_max_len))
-    print("Infer dataset after len cutoff")
+    #print("Infer dataset after len cutoff")
 
   # Convert the word strings to ids  
   def varg_vocab_lookup(*x):
@@ -253,7 +254,7 @@ def get_infer_iteratorNt(traces_dataset,
     return tuple(lookup_results)
 
   src_dataset = src_dataset.map(lambda *x: varg_vocab_lookup(x))
-  print("Infer dataset after vocab lookup: " + str(src_dataset))
+  #print("Infer dataset after vocab lookup: " + str(src_dataset))
 
   # Add in the word counts.
   def varg_get_size(*x):
@@ -263,7 +264,7 @@ def get_infer_iteratorNt(traces_dataset,
     return tuple(sizes)
 
   src_dataset = src_dataset.map(lambda *x: (*(x),*(varg_get_size(x))))
-  print("Infer dataset after adding in seq length: " + str(src_dataset))
+  #print("Infer dataset after adding in seq length: " + str(src_dataset))
 
   def batching_func(x):
     
@@ -288,9 +289,9 @@ def get_infer_iteratorNt(traces_dataset,
     
 
   batched_dataset = batching_func(src_dataset)
-  print("Batched infer dataset: " + str(batched_dataset))
+  #print("Batched infer dataset: " + str(batched_dataset))
   batched_iter = batched_dataset.make_initializable_iterator()
-  print("Batched infer iter: " + str(batched_iter))
+  #print("Batched infer iter: " + str(batched_iter))
 
   traces_and_lens = [1] * 2 * hparams.num_traces
   
@@ -716,7 +717,7 @@ def get_iteratorNt(traces_dataset,
   tgt_eos_id = tf.cast(tgt_vocab_table.lookup(tf.constant(eos)), tf.int32)
 
   src_tgt_dataset = tf.data.Dataset.zip((*traces_dataset, tgt_dataset))
-  print("src_tgt_dataset after zip: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after zip: " + str(src_tgt_dataset))
 
   src_tgt_dataset = src_tgt_dataset.shard(num_shards, shard_index)
   if skip_count is not None:
@@ -725,7 +726,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.shuffle(
       output_buffer_size, random_seed, reshuffle_each_iteration)
 
-  print("src_tgt_dataset before split: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset before split: " + str(src_tgt_dataset))
   
   # Split dataset into sentences
   def varg_string_split(*x):
@@ -738,7 +739,7 @@ def get_iteratorNt(traces_dataset,
 
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: varg_string_split(x), num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-  print("src_tgt_dataset after split: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after split: " + str(src_tgt_dataset))
 
   # Filter zero length input sequences.
   def varg_logical_and(*x):
@@ -749,7 +750,7 @@ def get_iteratorNt(traces_dataset,
 
   src_tgt_dataset = src_tgt_dataset.filter(
       lambda *x: varg_logical_and(x) )
-  print("src_tgt_dataset after zero len filter: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after zero len filter: " + str(src_tgt_dataset))
 
   def varg_len_cutoff(*x, max_len):
     results = []
@@ -761,12 +762,12 @@ def get_iteratorNt(traces_dataset,
     src_tgt_dataset = src_tgt_dataset.map(
         lambda *x: varg_len_cutoff(x,max_len=src_max_len),
         num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-    print("src_tgt_dataset after src_max_len cutoff: " + str(src_tgt_dataset))
+    #print("src_tgt_dataset after src_max_len cutoff: " + str(src_tgt_dataset))
   if tgt_max_len:
     src_tgt_dataset = src_tgt_dataset.map(
         lambda *x: varg_len_cutoff(x,max_len=tgt_max_len),
         num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-    print("src_tgt_dataset after tgt_max_len cutoff: " + str(src_tgt_dataset))
+    #print("src_tgt_dataset after tgt_max_len cutoff: " + str(src_tgt_dataset))
 
   # Convert the word strings to ids.  Word strings that are not in the
   # vocab get the lookup table's default_value integer.
@@ -783,7 +784,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: varg_vocab_lookup(x),
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-  print("src_tgt_dataset after vocab lookup: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after vocab lookup: " + str(src_tgt_dataset))
 
   # Create a tgt_input prefixed with <sos> and a tgt_output suffixed with <eos>.
   def varg_append_token(*x):
@@ -810,7 +811,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: (varg_append_token(x)),
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-  print("src_tgt_dataset after tgt prefix/suffix: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after tgt prefix/suffix: " + str(src_tgt_dataset))
 
   # Add in sequence lengths.
   def varg_get_size(*x):
@@ -827,7 +828,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: (*(x), *(varg_get_size(x))),
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
-  print("src_tgt_dataset after adding seq lens: " + str(src_tgt_dataset))
+  #print("src_tgt_dataset after adding seq lens: " + str(src_tgt_dataset))
 
   # Bucket by source sequence length (buckets for lengths 0-9, 10-19, ...)
   def batching_func(x):
@@ -880,10 +881,10 @@ def get_iteratorNt(traces_dataset,
   else:
   '''
   batched_dataset = batching_func(src_tgt_dataset)
-  print("batched_dataset: " + str(batched_dataset))
+  #print("batched_dataset: " + str(batched_dataset))
 
   batched_iter = batched_dataset.make_initializable_iterator()
-  print("batched_iter: " + str(batched_iter))
+  #print("batched_iter: " + str(batched_iter))
 
   unpacked_iter = []
 
@@ -903,6 +904,6 @@ def get_iteratorNt(traces_dataset,
       target_output=tgt_output_ids,
       traces_sequence_length=trace_lens,
       target_sequence_length=tgt_seq_len)
-  print("BatchedInputIter: " + str(BatchedInputIter))
+  #print("BatchedInputIter: " + str(BatchedInputIter))
 
   return BatchedInputIter

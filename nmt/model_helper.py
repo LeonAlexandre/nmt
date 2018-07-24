@@ -104,40 +104,11 @@ def create_train_model(
           num_shards=num_workers,
           shard_index=jobid)
 
-    elif hparams.num_traces == 2:   # 2 traces
-
-      trace0_file = "%s.%s" % (hparams.train_prefix, hparams.trace0)
-      trace1_file = "%s.%s" % (hparams.train_prefix, hparams.trace1)
-      tgt_file = "%s.%s" % (hparams.train_prefix, hparams.tgt)
-
-      trace0_dataset = tf.data.TextLineDataset(trace0_file)
-      trace1_dataset = tf.data.TextLineDataset(trace1_file)
-      tgt_dataset = tf.data.TextLineDataset(tgt_file)
-      skip_count_placeholder = tf.placeholder(shape=(), dtype=tf.int64)
-
-      iterator = iterator_utils.get_iterator2t(
-          trace0_dataset,
-          trace1_dataset,
-          tgt_dataset,
-          src_vocab_table,
-          tgt_vocab_table,
-          batch_size=hparams.batch_size,
-          sos=hparams.sos,
-          eos=hparams.eos,
-          random_seed=hparams.random_seed,
-          num_buckets=hparams.num_buckets,
-          src_max_len=hparams.src_max_len,
-          tgt_max_len=hparams.tgt_max_len,
-          skip_count=skip_count_placeholder,
-          num_shards=num_workers,
-          shard_index=jobid,
-          hparams=hparams)
-
     else:   # N traces
 
       traces_dataset = []
       for i in range(hparams.num_traces):
-        traces_dataset.append(tf.data.TextLineDataset("%s.trace%s" % (hparams.train_prefix, str(i))))
+        traces_dataset.append(tf.data.TextLineDataset("%s.%s" % (hparams.train_prefix, hparams.src+str(i))))
       traces_dateset = tuple(traces_dataset)
       tgt_dataset = tf.data.TextLineDataset("%s.%s" % (hparams.train_prefix, hparams.tgt))
 
@@ -228,30 +199,6 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
           src_max_len=hparams.src_max_len_infer,
           tgt_max_len=hparams.tgt_max_len_infer)
 
-    elif hparams.num_traces == 2:   # 2 traces
-
-      trace0_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
-      trace1_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
-      tgt_file_placeholder = tf.placeholder(shape=(), dtype=tf.string)
-      trace0_dataset = tf.data.TextLineDataset(trace0_file_placeholder)
-      trace1_dataset = tf.data.TextLineDataset(trace1_file_placeholder)
-      tgt_dataset = tf.data.TextLineDataset(tgt_file_placeholder)
-
-      iterator = iterator_utils.get_iterator2t(
-          trace0_dataset,
-          trace1_dataset,
-          tgt_dataset,
-          src_vocab_table,
-          tgt_vocab_table,
-          batch_size=hparams.batch_size,
-          sos=hparams.sos,
-          eos=hparams.eos,
-          random_seed=hparams.random_seed,
-          num_buckets=hparams.num_buckets,
-          src_max_len=hparams.src_max_len,
-          tgt_max_len=hparams.tgt_max_len,
-          hparams=hparams)
-      
     else: # N traces
 
       traces_file_placeholders = []
@@ -295,14 +242,7 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
       src_file_placeholder=src_file_placeholder,
       tgt_file_placeholder=tgt_file_placeholder,
       iterator=iterator)
-  elif hparams.num_traces == 2:
-    return EvalModel2t(
-      graph=graph,
-      model=model,
-      trace0_file_placeholder=trace0_file_placeholder,
-      trace1_file_placeholder=trace1_file_placeholder,
-      tgt_file_placeholder=tgt_file_placeholder,
-      iterator=iterator)
+  
   else:
     return EvalModelNt(
       graph=graph,
@@ -356,25 +296,7 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
           batch_size=batch_size_placeholder,
           eos=hparams.eos,
           src_max_len=hparams.src_max_len_infer)
-
-    elif hparams.num_traces == 2:   # 2 traces
-
-      trace0_placeholder = tf.placeholder(shape=[None], dtype=tf.string)
-      trace1_placeholder = tf.placeholder(shape=[None], dtype=tf.string)
-      batch_size_placeholder = tf.placeholder(shape=[], dtype=tf.int64)
-
-      trace0_dataset = tf.data.Dataset.from_tensor_slices(trace0_placeholder)
-      trace1_dataset = tf.data.Dataset.from_tensor_slices(trace1_placeholder)
-
-      iterator = iterator_utils.get_infer_iterator2t(
-          trace0_dataset,
-          trace1_dataset,
-          src_vocab_table,
-          batch_size=batch_size_placeholder,
-          eos=hparams.eos,
-          src_max_len=hparams.src_max_len_infer,
-          hparams=hparams)
-
+    
     else: # N traces
 
       traces_placeholder = []
@@ -415,14 +337,7 @@ def create_infer_model(model_creator, hparams, scope=None, extra_args=None):
       src_placeholder=src_placeholder,
       batch_size_placeholder=batch_size_placeholder,
       iterator=iterator)
-  elif hparams.num_traces == 2:
-    return InferModel2t(
-      graph=graph,
-      model=model,
-      trace0_placeholder=trace0_placeholder,
-      trace1_placeholder=trace1_placeholder,
-      batch_size_placeholder=batch_size_placeholder,
-      iterator=iterator)
+  
   else:
     return InferModelNt(
       graph=graph,

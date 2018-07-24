@@ -580,8 +580,8 @@ class Model(BaseModel):
             sequence_length=iterator.source_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-        print("Old model encoder outputs: " + str(encoder_outputs))
-        print("Old model encoder state: " + str(encoder_state))
+        #print("Old model encoder outputs: " + str(encoder_outputs))
+        #print("Old model encoder state: " + str(encoder_state))
       elif hparams.encoder_type == "bi":
         num_bi_layers = int(num_layers / 2)
         num_bi_residual_layers = int(num_residual_layers / 2)
@@ -932,8 +932,8 @@ class Model2t(BaseModel):
             sequence_length=iterator.trace0_sequence_length,
             time_major=self.time_major,
             swap_memory=True)
-    print("enc0 outputs: " + str(enc0_outputs))
-    print("enc0 state: " + str(enc0_state))
+    #print("enc0 outputs: " + str(enc0_outputs))
+    #print("enc0 state: " + str(enc0_state))
 
     with tf.variable_scope("encoder1") as scope:
       dtype = scope.dtype
@@ -1349,7 +1349,7 @@ class ModelNt(BaseModel):
     iterator = self.iterator
 
     traces = [*(iterator.traces)]
-    print("Traces from iterator: " + str(traces))
+    #print("Traces from iterator: " + str(traces))
 
     encoder_outputs = []
     encoder_states = []
@@ -1358,7 +1358,7 @@ class ModelNt(BaseModel):
       for i in range(hparams.num_traces):
         traces[i] = tf.transpose(traces[i])
 
-    print("Traces from iterator after transposing individual sets: " + str(traces))
+    #print("Traces from iterator after transposing individual sets: " + str(traces))
 
     for i in range(hparams.num_traces):
       with tf.variable_scope("encoder%d" % i) as scope:
@@ -1384,8 +1384,8 @@ class ModelNt(BaseModel):
 
           num_bi_layers = int(num_layers / 2)
           num_bi_residual_layers = int(num_residual_layers / 2)
-          utils.print_out("  num_bi_layers = %d, num_bi_residual_layers=%d" %
-                          (num_bi_layers, num_bi_residual_layers))
+          utils.print_out("  Encoder%d: num_bi_layers = %d, num_bi_residual_layers=%d" %
+                          (i,num_bi_layers, num_bi_residual_layers))
 
           enc_out, bi_enc_state = (
               self._build_bidirectional_rnn(
@@ -1457,7 +1457,7 @@ class ModelNt(BaseModel):
 
     ## Decoder.
     with tf.variable_scope("decoder") as decoder_scope:
-      utils.print_out("  Decoder:")
+      utils.print_out("  Decoder: num_layers = %d" % (hparams.num_decoder_layers))
       cell, decoder_initial_state = self._build_decoder_cell(
           hparams, encoder_outputs, encoder_state,
           iterator.traces_sequence_length[0])
