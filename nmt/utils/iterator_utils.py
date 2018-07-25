@@ -15,6 +15,8 @@
 """For loading data into NMT models."""
 from __future__ import print_function
 
+import numpy as np
+
 import collections
 
 import tensorflow as tf
@@ -270,7 +272,7 @@ def get_infer_iteratorNt(traces_dataset,
     
     padded_shape = []
     for i in range(hparams.num_traces):
-      padded_shape.append(tf.TensorShape([None]))
+      padded_shape.append(tf.TensorShape([hparams.src_max_len_infer]))
     for i in range(hparams.num_traces):
       padded_shape.append(tf.TensorShape([]))
     padded_shape = tuple(padded_shape)
@@ -830,10 +832,11 @@ def get_iteratorNt(traces_dataset,
       num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
   #print("src_tgt_dataset after adding seq lens: " + str(src_tgt_dataset))
 
-  # Bucket by source sequence length (buckets for lengths 0-9, 10-19, ...)
   def batching_func(x):
     padded_shape = []
-    for i in range(hparams.num_traces+2):
+    for i in range(hparams.num_traces):
+      padded_shape.append(tf.TensorShape([src_max_len]))
+    for i in range(2):
       padded_shape.append(tf.TensorShape([None]))
     for i in range(hparams.num_traces+1):
       padded_shape.append(tf.TensorShape([]))
@@ -853,6 +856,7 @@ def get_iteratorNt(traces_dataset,
         padded_shapes=(padded_shape),
         padding_values=(padding_values))
 
+  # Bucket by source sequence length (buckets for lengths 0-9, 10-19, ...)
   '''
   if num_buckets > 1:
 

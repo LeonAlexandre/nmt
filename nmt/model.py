@@ -1298,7 +1298,7 @@ class ModelNt(BaseModel):
       encoder_outputs, encoder_state = self._build_encoder(hparams)
       #print("Encoder_outputs: " + str(encoder_outputs))
       #print("Encoder_state: " + str(encoder_state))
-
+      
       ## Decoder
       logits, sample_id, final_context_state = self._build_decoder(
           encoder_outputs, encoder_state, hparams)
