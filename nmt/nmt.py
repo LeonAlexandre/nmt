@@ -178,6 +178,7 @@ def add_arguments(parser):
                       Whether check special sos, eos, unk tokens exist in the
                       vocab files.\
                       """)
+  parser.add_argument("--embed_size", type=int, default=128)
 
   # Sequence lengths
   parser.add_argument("--src_max_len", type=int, default=50,
@@ -363,6 +364,7 @@ def create_hparams(flags):
       eos=flags.eos if flags.eos else vocab_utils.EOS,
       subword_option=flags.subword_option,
       check_special_token=flags.check_special_token,
+      embed_size = flags.embed_size,
 
       # Misc
       forget_bias=flags.forget_bias,
