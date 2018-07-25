@@ -338,7 +338,10 @@ def train(hparams, scope=None, target_session=""):
         hparams.attention_architecture in ["gnmt", "gnmt_v2"]):
       model_creator = gnmt_model.GNMTModel
     elif hparams.attention_architecture == "standard":
-      model_creator = attention_model.AttentionModel
+      if hparams.num_traces == 1:
+        model_creator = attention_model.AttentionModel
+      else:
+        model_creator = attention_model.AttentionModelNt
     else:
       raise ValueError("Unknown attention architecture %s" %
                        hparams.attention_architecture)

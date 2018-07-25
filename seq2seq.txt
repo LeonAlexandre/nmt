@@ -19,3 +19,6 @@ Old model encoder state: (LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/encoder/r
 
 Concat encoder outputs: Tensor("dynamic_seq2seq/concat:0", shape=(?, ?, 256), dtype=float32)
 Concat encoder state: ([LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_1:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_2:0' shape=(?, 256) dtype=float32>), LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_3:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_4:0' shape=(?, 256) dtype=float32>)],)
+
+
+

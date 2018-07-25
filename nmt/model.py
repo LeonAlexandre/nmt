@@ -30,7 +30,7 @@ from .utils import misc_utils as utils
 
 utils.check_tensorflow_version()
 
-__all__ = ["BaseModel", "Model"]
+__all__ = ["BaseModel", "Model", "Model2t", "ModelNt"]
 
 
 class BaseModel(object):
@@ -297,6 +297,8 @@ class BaseModel(object):
     with tf.variable_scope(scope or "dynamic_seq2seq", dtype=dtype):
       # Encoder
       encoder_outputs, encoder_state = self._build_encoder(hparams)
+      #print("Encoder_outputs: " + str(encoder_outputs))
+      #print("Encoder_state: " + str(encoder_state))
 
       ## Decoder
       logits, sample_id, final_context_state = self._build_decoder(
@@ -1294,6 +1296,8 @@ class ModelNt(BaseModel):
     with tf.variable_scope(scope or "dynamic_seq2seq", dtype=dtype):
       # Encoder
       encoder_outputs, encoder_state = self._build_encoder(hparams)
+      #print("Encoder_outputs: " + str(encoder_outputs))
+      #print("Encoder_state: " + str(encoder_state))
 
       ## Decoder
       logits, sample_id, final_context_state = self._build_decoder(
@@ -1427,7 +1431,7 @@ class ModelNt(BaseModel):
 
     encoder_state = tuple(layer_states)
 
-    return encoder_outputs, encoder_state
+    return concat_outputs, encoder_state
 
 
 ###############################################################################################
