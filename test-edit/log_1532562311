@@ -1,3 +1,0 @@
-# log_file=./test-edit/log_1532562311
-# Start step 0, lr 0.0001, Wed Jul 25 16:45:37 2018
-  step 100 lr 0.0001 step-time 0.54s wps 2.77K ppl 2.27 gN 14.49 edit_distance 117.36, hamming_distance 19.80, Wed Jul 25 16:46:32 2018

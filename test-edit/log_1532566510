@@ -1,0 +1,8 @@
+# log_file=./test-edit/log_1532566510
+# Start step 0, lr 0.0001, Wed Jul 25 17:55:19 2018
+  step 100 lr 0.0001 step-time 0.45s wps 3.31K ppl 2.38 gN 12.73 edit_distance 73.41, hamming_distance 18.46, Wed Jul 25 17:56:04 2018
+  step 200 lr 0.0001 step-time 0.42s wps 3.58K ppl 1.79 gN 21.09 edit_distance 73.41, hamming_distance 18.46, Wed Jul 25 17:56:46 2018
+  step 300 lr 0.0001 step-time 0.41s wps 3.65K ppl 1.65 gN 28.14 edit_distance 9.04, hamming_distance 9.61, Wed Jul 25 17:57:31 2018
+# Final, step 300 lr 0.0001 step-time 0.41s wps 3.65K ppl 1.65 gN 28.14 dev ppl 1.58, dev edit_distance 8.8, dev hamming_distance 9.5, test ppl 1.58, test edit_distance 8.8, test hamming_distance 9.6, Wed Jul 25 17:57:38 2018
+# Best edit_distance, step 0 lr 0.0001 step-time 0.41s wps 3.65K ppl 1.65 gN 28.14 dev ppl 4.97, dev edit_distance 45.3, dev hamming_distance 17.9, test ppl 4.97, test edit_distance 45.0, test hamming_distance 17.9, Wed Jul 25 17:57:45 2018
+# Best hamming_distance, step 300 lr 0.0001 step-time 0.41s wps 3.65K ppl 1.65 gN 28.14 dev ppl 1.58, dev edit_distance 8.8, dev hamming_distance 9.5, test ppl 1.58, test edit_distance 8.8, test hamming_distance 9.6, Wed Jul 25 17:57:51 2018

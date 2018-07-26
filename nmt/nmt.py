@@ -258,6 +258,8 @@ def add_arguments(parser):
   parser.add_argument("--inference_list", type=str, default=None,
                       help=("A comma-separated list of sentence indices "
                             "(0-based) to decode."))
+  parser.add_argument("--inference_input_prefix", type=str, default=None,
+                      help="Prefix for inference input files, used for multi-encoder architecture.")
   parser.add_argument("--infer_batch_size", type=int, default=32,
                       help="Batch size for inference mode.")
   parser.add_argument("--inference_output_file", type=str, default=None,
@@ -610,6 +612,16 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             metric,
             hparams.subword_option)
         utils.print_out("  %s: %.1f" % (metric, score))
+        
+  elif flags.inference_input_prefix:
+    hparams.inference_indices = None
+    # Do multi-encoder inference
+    trans_file = flags.inference_output_file
+    ckpt = flags.ckpt
+    if not ckpt:
+      ckpt = tf.train.latest_checkpoint(out_dir)
+    inference_fn(ckpt,flags.inference_input_prefix,
+                 trans_file, hparams, num_workers, jobid)
   else:
     # Train
     train_fn(hparams, target_session=target_session)
