@@ -1203,7 +1203,8 @@ class ModelNt(BaseModel):
       self.train_loss = res[1]
       self.word_count = 0
       for i in range(hparams.num_traces):
-        self.word_count = tf.reduce_sum(iterator.traces_sequence_length[i])
+        self.word_count += tf.reduce_sum(iterator.traces_sequence_length[i])
+      self.word_count += tf.reduce_sum(iterator.target_sequence_length)
     elif self.mode == tf.contrib.learn.ModeKeys.EVAL:
       self.eval_loss = res[1]
     elif self.mode == tf.contrib.learn.ModeKeys.INFER:
