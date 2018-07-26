@@ -513,6 +513,11 @@ def extend_hparams(hparams):
       hparams.add_hparam("avg_best_" + metric + "_dir", best_metric_dir)
       tf.gfile.MakeDirs(best_metric_dir)
 
+  print("Num metrics: %d" % len(hparams.metrics))
+  print("Num keep ckpt: %d" % hparams.num_keep_ckpts)
+  if len(hparams.metrics) > hparams.num_keep_ckpts:
+    setattr(hparams, "num_keep_ckpts", len(hparams.metrics))
+
   return hparams
 
 

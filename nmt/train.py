@@ -660,5 +660,6 @@ def _external_eval(model, global_step, sess, hparams, iterator,
             os.path.join(
                 getattr(hparams, best_metric_label + "_dir"), "translate.ckpt"),
             global_step=model.global_step)
+        print("saved a checkpoint for best %s" % metric)
     utils.save_hparams(out_dir, hparams)
   return scores
