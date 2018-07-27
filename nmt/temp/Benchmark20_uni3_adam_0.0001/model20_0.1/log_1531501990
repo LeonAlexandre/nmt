@@ -1,4 +1,0 @@
-# log_file=./nmt/temp/Benchmark20_uni3_adam_0.0001/model20_0.1/log_1531501990
-# Start step 30000, lr 0.0001, Fri Jul 13 17:13:17 2018
-# Final, step 30000 lr 0.0001 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.74, dev edit_distance 2.8, test ppl 1.75, test edit_distance 2.8, Fri Jul 13 17:13:20 2018
-# Best edit_distance, step 12000 lr 0.0001 step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.31, dev edit_distance 2.5, test ppl 1.31, test edit_distance 2.5, Fri Jul 13 17:13:24 2018

@@ -1,3 +1,0 @@
-# log_file=./nmt/temp/binary_seq_model_bi_att_short\log_1531163624
-# Start step 0, lr 1, Mon Jul  9 12:13:47 2018
-  step 100 lr 1 step-time 0.15s wps 11.27K ppl 28.57 gN 34.14 edit_distance 500.00, Mon Jul  9 12:14:02 2018

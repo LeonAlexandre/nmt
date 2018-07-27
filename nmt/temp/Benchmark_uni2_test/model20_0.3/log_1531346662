@@ -1,3 +1,0 @@
-# log_file=./nmt/temp/Benchmark_uni2/model20_0.3/log_1531346662
-# Start step 4000, lr 0.001, Wed Jul 11 22:04:26 2018
-  step 4100 lr 0.001 step-time 0.30s wps 14.52K ppl 1.50 gN 9.77 edit_distance 4.90, Wed Jul 11 22:04:56 2018
