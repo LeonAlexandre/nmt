@@ -21,6 +21,7 @@ from __future__ import print_function
 import abc
 
 import tensorflow as tf
+import numpy as np
 
 from tensorflow.python.layers import core as layers_core
 
@@ -308,7 +309,7 @@ class BaseModel(object):
       if self.mode != tf.contrib.learn.ModeKeys.INFER:
         with tf.device(model_helper.get_device_str(self.num_encoder_layers - 1,
                                                    self.num_gpus)):
-          loss = self._compute_loss(logits)
+          loss = self._compute_loss(logits, sample_id)
       else:
         loss = None
 
@@ -497,14 +498,15 @@ class BaseModel(object):
     """
     pass
 
-  def _compute_loss(self, logits):
+  def _compute_loss(self, logits, sample_id):
     """Compute optimization loss."""
     target_output = self.iterator.target_output
     if self.time_major:
       target_output = tf.transpose(target_output)
     max_time = self.get_max_time(target_output)
-    logits = utils.debug_tensor(logits, "Logits to compute loss: ",40)
-    target_output = utils.debug_tensor(target_output, "Target output for loss: ",40)
+    #logits = utils.debug_tensor(logits, "Logits to compute loss: ", 40)
+    #sample_id = utils.debug_tensor(sample_id, "Sample id to compute loss: ", 40)
+    #target_output = utils.debug_tensor(target_output, "Target output for loss: ", 40)
     crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=target_output, logits=logits)
 
@@ -513,11 +515,26 @@ class BaseModel(object):
     if self.time_major:
       target_weights = tf.transpose(target_weights)
 
-    crossent = utils.debug_tensor(crossent, "Crossent tensor: ",20)
+    #crossent = utils.debug_tensor(crossent, "Crossent tensor: ",20)
+    #sample_id = utils.debug_tensor(sample_id, "Sample id for loss: ", 20)
+
+    #metric_loss = self._compute_metric(max_time, target_output, sample_id)
+    #metric_loss = utils.debug_tensor(metric_loss,"Result from compute metric: ", 10)
 
     loss = tf.reduce_sum(
         crossent * target_weights) / tf.to_float(self.batch_size)
     return loss
+
+  # Not fully implemented and tested, many problems, do not use
+  def _compute_metric(self, max_time, target_output, network_output):
+    metric = 0
+    unstacked_target_out = tf.unstack(target_output,max_time,axis=1)
+    unstacked_network_out = tf.unstack(network_output,max_time,axis=1)
+    for t,n in zip(unstacked_target_out,unstacked_network_out):
+      e = tf.equal(t,n)
+      metric += np.sum(tf.to_int64(e))
+
+    return metric
 
   def _get_infer_summary(self, hparams):
     return tf.no_op()
@@ -1313,7 +1330,7 @@ class ModelNt(BaseModel):
       if self.mode != tf.contrib.learn.ModeKeys.INFER:
         with tf.device(model_helper.get_device_str(self.num_encoder_layers - 1,
                                                    self.num_gpus)):
-          loss = self._compute_loss(logits)
+          loss = self._compute_loss(logits, sample_id)
       else:
         loss = None
 
@@ -1560,6 +1577,9 @@ class ModelNt(BaseModel):
         else:
           logits = outputs.rnn_output
           sample_id = outputs.sample_id
+
+    #logits = utils.debug_tensor(logits, "Logits from decoder: ", 100)
+    #sample_id = utils.debug_tensor(sample_id, "Sample id from decoder: ", 100)
 
     return logits, sample_id, final_context_state
 
