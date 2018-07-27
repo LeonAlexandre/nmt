@@ -21,6 +21,8 @@ import collections
 
 import tensorflow as tf
 
+from . import misc_utils as utils
+
 __all__ = ["BatchedInput", "BatchedInput2t", "BatchedInputNt",
            "get_iterator", "get_iterator2t", "get_iteratorNt",
            "get_infer_iterator", "get_infer_iterator2t", "get_infer_iteratorNt"]
@@ -725,8 +727,8 @@ def get_iteratorNt(traces_dataset,
   if skip_count is not None:
     src_tgt_dataset = src_tgt_dataset.skip(skip_count)
 
-  src_tgt_dataset = src_tgt_dataset.shuffle(
-      output_buffer_size, random_seed, reshuffle_each_iteration)
+  #src_tgt_dataset = src_tgt_dataset.shuffle(
+  #    output_buffer_size, random_seed, reshuffle_each_iteration)
 
   #print("src_tgt_dataset before split: " + str(src_tgt_dataset))
   
@@ -742,7 +744,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: varg_string_split(x), num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
   #print("src_tgt_dataset after split: " + str(src_tgt_dataset))
-
+  
   # Filter zero length input sequences.
   def varg_logical_and(*x):
     predicates = tf.size(x[0][0]) > 0
@@ -754,23 +756,30 @@ def get_iteratorNt(traces_dataset,
       lambda *x: varg_logical_and(x) )
   #print("src_tgt_dataset after zero len filter: " + str(src_tgt_dataset))
 
-  def varg_len_cutoff(*x, max_len):
+  # cutoff sequences in the dataset according to "max_len"
+  # "start" specifies from which item in the dataset to start applying the length cutoff
+  # "end" specifies from which item in the dataset to stop applying the length cutoff
+  def varg_len_cutoff(*x, start, end, max_len):
     results = []
+    k = 0
     for i in x[0]:
-      results.append(i[:max_len])
+      if (k >= start and k < end):
+        results.append(i[:max_len])
+      else:
+        results.append(i)
+      k += 1
+
     return tuple(results)
 
   if src_max_len:
     src_tgt_dataset = src_tgt_dataset.map(
-        lambda *x: varg_len_cutoff(x,max_len=src_max_len),
-        num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
+        lambda *x: varg_len_cutoff(x, start=0, end=hparams.num_traces, max_len=src_max_len)).prefetch(output_buffer_size)
     #print("src_tgt_dataset after src_max_len cutoff: " + str(src_tgt_dataset))
   if tgt_max_len:
     src_tgt_dataset = src_tgt_dataset.map(
-        lambda *x: varg_len_cutoff(x,max_len=tgt_max_len),
-        num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
+        lambda *x: varg_len_cutoff(x, start=hparams.num_traces, end=hparams.num_traces+1, max_len=tgt_max_len)).prefetch(output_buffer_size)
     #print("src_tgt_dataset after tgt_max_len cutoff: " + str(src_tgt_dataset))
-
+  
   # Convert the word strings to ids.  Word strings that are not in the
   # vocab get the lookup table's default_value integer.
   def varg_vocab_lookup(*x):
@@ -780,39 +789,30 @@ def get_iteratorNt(traces_dataset,
       if n_trace < hparams.num_traces:
         lookup_results.append(tf.cast(src_vocab_table.lookup(i), tf.int32))
         n_trace += 1
-    lookup_results.append(tf.cast(tgt_vocab_table.lookup(i), tf.int32))
+      else:
+        lookup_results.append(tf.cast(tgt_vocab_table.lookup(i), tf.int32))
     return tuple(lookup_results)
 
   src_tgt_dataset = src_tgt_dataset.map(
-      lambda *x: varg_vocab_lookup(x),
-      num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
+      lambda *x: varg_vocab_lookup(x)).prefetch(output_buffer_size)
   #print("src_tgt_dataset after vocab lookup: " + str(src_tgt_dataset))
 
   # Create a tgt_input prefixed with <sos> and a tgt_output suffixed with <eos>.
   def varg_append_token(*x):
     appended = []
-    reverse_x = reversed(x[0])
-    first = True
-    for i in reverse_x:
-      if first:
-        prefix_sos = tf.concat(([tgt_sos_id], i), 0)
-        suffix_eos = tf.concat((i, [tgt_eos_id]), 0)
-      else:
-        break
     n_trace = 0
     for i in x[0]:
       if n_trace < hparams.num_traces:
         appended.append(i)
         n_trace += 1
       else:
+        appended.append(tf.concat(([tgt_sos_id], i), 0))
+        appended.append(tf.concat((i, [tgt_eos_id]), 0))
         break
-    appended.append(prefix_sos)
-    appended.append(suffix_eos)
     return tuple(appended)
 
   src_tgt_dataset = src_tgt_dataset.map(
-      lambda *x: (varg_append_token(x)),
-      num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
+      lambda *x: (varg_append_token(x))).prefetch(output_buffer_size)
   #print("src_tgt_dataset after tgt prefix/suffix: " + str(src_tgt_dataset))
 
   # Add in sequence lengths.
@@ -828,8 +828,7 @@ def get_iteratorNt(traces_dataset,
     return tuple(sizes)
 
   src_tgt_dataset = src_tgt_dataset.map(
-      lambda *x: (*(x), *(varg_get_size(x))),
-      num_parallel_calls=num_parallel_calls).prefetch(output_buffer_size)
+      lambda *x: (*(x), *(varg_get_size(x)))).prefetch(output_buffer_size)
   #print("src_tgt_dataset after adding seq lens: " + str(src_tgt_dataset))
 
   def batching_func(x):
@@ -853,8 +852,8 @@ def get_iteratorNt(traces_dataset,
 
     return x.padded_batch(
         batch_size,
-        padded_shapes=(padded_shape),
-        padding_values=(padding_values))
+        padded_shapes=padded_shape,
+        padding_values=padding_values)
 
   # Bucket by source sequence length (buckets for lengths 0-9, 10-19, ...)
   '''
@@ -894,10 +893,14 @@ def get_iteratorNt(traces_dataset,
 
   #(*(traces), tgt_input_ids, tgt_output_ids, *(trace_lens), tgt_seq_len) = (batched_iter.get_next())
   (*unpacked_iter,) = (batched_iter.get_next())
+  print("unpacked_iter: " + str(unpacked_iter))
 
-  traces = tuple(unpacked_iter[0:hparams.num_traces])
+  trace0_node = utils.debug_tensor(unpacked_iter[0],"Trace0 from iter: ", 40)
+  traces = tuple([trace0_node,*unpacked_iter[1:hparams.num_traces]])
   tgt_input_ids = unpacked_iter[hparams.num_traces]
+  tgt_input_ids = utils.debug_tensor(tgt_input_ids, "Tgt in ids from iter: ",40)
   tgt_output_ids = unpacked_iter[hparams.num_traces+1]
+  tgt_output_ids = utils.debug_tensor(tgt_output_ids,"Tgt out ids from iter: ",40)
   trace_lens = tuple(unpacked_iter[hparams.num_traces+2:2*hparams.num_traces+2])
   tgt_seq_len = unpacked_iter[-1]
 
