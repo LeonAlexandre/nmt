@@ -1,5 +1,0 @@
-make run_sample_decode compatible with 2 traces			check?
-make run_full_eval compatible with 2 traces
-.....run_internal_eval.....................  			check?
-.....run_external_eval.....................				check?
-

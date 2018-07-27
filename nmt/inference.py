@@ -87,22 +87,14 @@ def inference(ckpt,
               num_workers=1,
               jobid=0,
               scope=None):
-  # inference_input_file is input file prefix in multi-encoder mode
-
   """Perform translation."""
   if hparams.inference_indices:
     assert num_workers == 1
 
   if not hparams.attention:
-    if hparams.num_traces == 1:
-      model_creator = nmt_model.Model
-    else:
-      model_creator = nmt_model.ModelNt
+    model_creator = nmt_model.Model
   elif hparams.attention_architecture == "standard":
-    if hparams.num_traces == 1:
-      model_creator = attention_model.AttentionModel
-    else:
-      model_creator = attention_model.AttentionModelNt
+    model_creator = attention_model.AttentionModel
   elif hparams.attention_architecture in ["gnmt", "gnmt_v2"]:
     model_creator = gnmt_model.GNMTModel
   else:
@@ -113,18 +105,19 @@ def inference(ckpt,
     single_worker_inference(
         infer_model,
         ckpt,
-        inference_input_file,   # this is input prefix when in multi-encoder mode
+        inference_input_file,
         inference_output_file,
         hparams)
   else:
     multi_worker_inference(
         infer_model,
         ckpt,
-        inference_input_file,   # this is input prefix when in multi-encoder mode
+        inference_input_file,
         inference_output_file,
         hparams,
         num_workers=num_workers,
         jobid=jobid)
+
 
 def single_worker_inference(infer_model,
                             ckpt,
@@ -135,31 +128,18 @@ def single_worker_inference(infer_model,
   output_infer = inference_output_file
 
   # Read data
-  if hparams.num_traces == 1:
-    infer_data = load_data(inference_input_file, hparams)
-  else:
-    infer_data = []
-    for i in range(hparams.num_traces):
-      infer_data.append(load_data("%s.%s" % (inference_input_file, hparams.src+str(i))))
-    infer_data = tuple(infer_data)
+  infer_data = load_data(inference_input_file, hparams)
 
   with tf.Session(
       graph=infer_model.graph, config=utils.get_config_proto()) as sess:
     loaded_infer_model = model_helper.load_model(
         infer_model.model, ckpt, sess, "infer")
-    if hparams.num_traces == 1:
-      sess.run(
-          infer_model.iterator.initializer,
-          feed_dict={
-              infer_model.src_placeholder: infer_data,
-              infer_model.batch_size_placeholder: hparams.infer_batch_size
-          })
-    else:
-      feed_dict = {i: d for i, d in zip(infer_model.traces_placeholder, infer_data)}
-      feed_dict[infer_model.batch_size_placeholder] = hparams.infer_batch_size
-      sess.run(
-          infer_model.iterator.initializer,
-          feed_dict=feed_dict)
+    sess.run(
+        infer_model.iterator.initializer,
+        feed_dict={
+            infer_model.src_placeholder: infer_data,
+            infer_model.batch_size_placeholder: hparams.infer_batch_size
+        })
     # Decode
     utils.print_out("# Start decoding")
     if hparams.inference_indices:
