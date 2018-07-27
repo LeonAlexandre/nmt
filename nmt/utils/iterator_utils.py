@@ -727,8 +727,8 @@ def get_iteratorNt(traces_dataset,
   if skip_count is not None:
     src_tgt_dataset = src_tgt_dataset.skip(skip_count)
 
-  #src_tgt_dataset = src_tgt_dataset.shuffle(
-  #    output_buffer_size, random_seed, reshuffle_each_iteration)
+  src_tgt_dataset = src_tgt_dataset.shuffle(
+      output_buffer_size, random_seed, reshuffle_each_iteration)
 
   #print("src_tgt_dataset before split: " + str(src_tgt_dataset))
   
@@ -893,14 +893,10 @@ def get_iteratorNt(traces_dataset,
 
   #(*(traces), tgt_input_ids, tgt_output_ids, *(trace_lens), tgt_seq_len) = (batched_iter.get_next())
   (*unpacked_iter,) = (batched_iter.get_next())
-  print("unpacked_iter: " + str(unpacked_iter))
 
-  trace0_node = utils.debug_tensor(unpacked_iter[0],"Trace0 from iter: ", 40)
-  traces = tuple([trace0_node,*unpacked_iter[1:hparams.num_traces]])
+  traces = tuple(unpacked_iter[0:hparams.num_traces])
   tgt_input_ids = unpacked_iter[hparams.num_traces]
-  tgt_input_ids = utils.debug_tensor(tgt_input_ids, "Tgt in ids from iter: ",40)
   tgt_output_ids = unpacked_iter[hparams.num_traces+1]
-  tgt_output_ids = utils.debug_tensor(tgt_output_ids,"Tgt out ids from iter: ",40)
   trace_lens = tuple(unpacked_iter[hparams.num_traces+2:2*hparams.num_traces+2])
   tgt_seq_len = unpacked_iter[-1]
 
