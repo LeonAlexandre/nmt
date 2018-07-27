@@ -564,10 +564,13 @@ def _sample_decode(model, global_step, sess, hparams, iterator, src_data, tgt_da
                    iterator_trace1_placeholder=None,
                    iterator_traces_placeholder=None):
   """Pick a sentence and decode."""
+  '''
   if hparams.num_traces == 1:
     decode_id = random.randint(0, len(src_data) - 1)
   else:
     decode_id = random.randint(0, len(src_data[0]) - 1)
+  '''
+  decode_id = 0
   utils.print_out("  # %d" % decode_id)
 
   if hparams.num_traces == 1:
