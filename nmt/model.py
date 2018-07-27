@@ -503,12 +503,17 @@ class BaseModel(object):
     if self.time_major:
       target_output = tf.transpose(target_output)
     max_time = self.get_max_time(target_output)
+    logits = utils.debug_tensor(logits, "Logits to compute loss: ",40)
+    target_output = utils.debug_tensor(target_output, "Target output for loss: ",40)
     crossent = tf.nn.sparse_softmax_cross_entropy_with_logits(
         labels=target_output, logits=logits)
+
     target_weights = tf.sequence_mask(
         self.iterator.target_sequence_length, max_time, dtype=logits.dtype)
     if self.time_major:
       target_weights = tf.transpose(target_weights)
+
+    crossent = utils.debug_tensor(crossent, "Crossent tensor: ",20)
 
     loss = tf.reduce_sum(
         crossent * target_weights) / tf.to_float(self.batch_size)
@@ -1203,7 +1208,8 @@ class ModelNt(BaseModel):
       self.train_loss = res[1]
       self.word_count = 0
       for i in range(hparams.num_traces):
-        self.word_count = tf.reduce_sum(iterator.traces_sequence_length[i])
+        self.word_count += tf.reduce_sum(iterator.traces_sequence_length[i])
+      self.word_count += tf.reduce_sum(iterator.target_sequence_length)
     elif self.mode == tf.contrib.learn.ModeKeys.EVAL:
       self.eval_loss = res[1]
     elif self.mode == tf.contrib.learn.ModeKeys.INFER:

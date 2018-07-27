@@ -222,8 +222,8 @@ def create_eval_model(model_creator, hparams, scope=None, extra_args=None):
           eos=hparams.eos,
           random_seed=hparams.random_seed,
           num_buckets=hparams.num_buckets,
-          src_max_len=hparams.src_max_len,
-          tgt_max_len=hparams.tgt_max_len,
+          src_max_len=hparams.src_max_len_infer,
+          tgt_max_len=hparams.tgt_max_len_infer,
           hparams=hparams)
 
     model = model_creator(
