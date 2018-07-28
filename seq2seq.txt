@@ -14,11 +14,7 @@ git commit -m "completed benchmark20 2 encoder 0.2"
 git push
 
 
-Old model encoder outputs: Tensor("dynamic_seq2seq/encoder/rnn/TensorArrayStack/TensorArrayGatherV3:0", shape=(?, ?, 128), dtype=float32)
-Old model encoder state: (LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_3:0' shape=(?, 128) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_4:0' shape=(?, 128) dtype=float32>), LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_5:0' shape=(?, 128) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/encoder/rnn/while/Exit_6:0' shape=(?, 128) dtype=float32>))
-
-Concat encoder outputs: Tensor("dynamic_seq2seq/concat:0", shape=(?, ?, 256), dtype=float32)
-Concat encoder state: ([LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_1:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_2:0' shape=(?, 256) dtype=float32>), LSTMStateTuple(c=<tf.Tensor 'dynamic_seq2seq/concat_3:0' shape=(?, 256) dtype=float32>, h=<tf.Tensor 'dynamic_seq2seq/concat_4:0' shape=(?, 256) dtype=float32>)],)
-
+python -m nmt.nmt --out_dir=./nmt/temp/Benchmark100_uni2_adam_0.0001/model100_0.4/best_edit_distance/ --inference_input_file=./nmt/temp/data20/data20_0.4/test.trace --inference_ou
+tput_file=./infer_20_using_100_model/test20_0.4_infer --inference_ref_file=./nmt/temp/data20/data20_0.4/test.label
 
 
