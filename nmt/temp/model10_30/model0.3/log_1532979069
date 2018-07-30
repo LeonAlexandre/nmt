@@ -1,0 +1,12 @@
+# log_file=./nmt/temp/model10_30/model0.3\log_1532979069
+# Start step 2500, lr 0.0001, Mon Jul 30 12:31:19 2018
+  step 2600 lr 0.0001 step-time 0.16s wps 29.97K ppl 1.83 gN 33.80 edit_distance 0.31, hamming_distance 0.40, Mon Jul 30 12:31:34 2018
+  step 2700 lr 0.0001 step-time 0.15s wps 30.78K ppl 1.82 gN 27.07 edit_distance 0.31, hamming_distance 0.40, Mon Jul 30 12:31:49 2018
+  step 2800 lr 0.0001 step-time 0.14s wps 30.96K ppl 1.81 gN 30.24 edit_distance 0.31, hamming_distance 0.40, Mon Jul 30 12:32:03 2018
+  step 2900 lr 0.0001 step-time 0.15s wps 30.54K ppl 1.81 gN 32.33 edit_distance 0.31, hamming_distance 0.40, Mon Jul 30 12:32:18 2018
+  step 3000 lr 0.0001 step-time 0.15s wps 29.54K ppl 1.81 gN 31.05 edit_distance 0.31, hamming_distance 0.40, Mon Jul 30 12:32:33 2018
+  step 3100 lr 0.0001 step-time 0.15s wps 29.86K ppl 1.80 gN 22.56 edit_distance 0.29, hamming_distance 0.39, Mon Jul 30 12:32:54 2018
+  step 3200 lr 0.0001 step-time 0.15s wps 29.44K ppl 1.80 gN 28.38 edit_distance 0.29, hamming_distance 0.39, Mon Jul 30 12:33:09 2018
+  step 3300 lr 0.0001 step-time 0.15s wps 30.22K ppl 1.80 gN 31.93 edit_distance 0.29, hamming_distance 0.39, Mon Jul 30 12:33:24 2018
+  step 3400 lr 0.0001 step-time 0.15s wps 30.30K ppl 1.79 gN 22.55 edit_distance 0.29, hamming_distance 0.39, Mon Jul 30 12:33:38 2018
+  step 3500 lr 0.0001 step-time 0.14s wps 30.96K ppl 1.79 gN 27.11 edit_distance 0.29, hamming_distance 0.39, Mon Jul 30 12:33:53 2018
