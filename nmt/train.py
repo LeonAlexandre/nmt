@@ -534,9 +534,9 @@ def _format_results(name, ppl, scores, metrics):
   if scores:
     for metric in metrics:
       if result_str:
-        result_str += ", %s %s %.1f" % (name, metric, np.abs(scores[metric]))
+        result_str += ", %s %s %.2f" % (name, metric, np.abs(scores[metric]))
       else:
-        result_str = "%s %s %.1f" % (name, metric, np.abs(scores[metric]))
+        result_str = "%s %s %.2f" % (name, metric, np.abs(scores[metric]))
   return result_str
 
 
