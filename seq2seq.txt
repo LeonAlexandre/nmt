@@ -11,8 +11,8 @@ git commit -m "completed benchmark20 2 encoder 0.2"
 git push
 
 
-python -m nmt.nmt --out_dir=./nmt/temp/model10_30_ranged/model0.1/best_edit_distance/ --inference_input_file=./nmt/temp/data40/data0.1/train.trace --inference_output_file=./infer_using_10_30_ranged_model/train40_0.1_infer --inference_ref_file=./nmt/temp/data40/data0.1/train.label
+python -m nmt.nmt --out_dir=./nmt/temp/model20_80_ranged/model0.2/best_edit_distance/ --inference_input_file=./nmt/temp/data10/data0.2/test.trace --inference_output_file=./infer_using_20_80_ranged_model/test10_0.2_infer --inference_ref_file=./nmt/temp/data10/data0.2/test.label
 
 
-python -m nmt.nmt --src=trace --tgt=label --vocab_prefix=./nmt/temp/binary_seq_vocab/vocab --train_prefix=./nmt/temp/data20_80_ranged/data0.2/train --dev_prefix=./nmt/temp/data20_80_ranged/data0.2/val --test_prefix=./nmt/temp/data20_80_ranged/data0.2/test --out_dir=./nmt/temp/model20_80_ranged/model0.2 --num_train_steps=30000 --steps_per_stats=100 --num_layers=2 --num_units=128 --dropout=0.2 --metrics=edit_distance,hamming_distance --share_vocab=True --encoder_type=uni --steps_per_external_eval=500 --optimizer=adam --learning_rate=0.0001 --src_max_len=200 --tgt_max_len=200 --src_max_len_infer=200 --num_traces=1
+python -m nmt.nmt --src=trace --tgt=label --vocab_prefix=./nmt/temp/binary_seq_vocab/vocab --train_prefix=./nmt/temp/data20_80_ranged/data0.2/train --dev_prefix=./nmt/temp/data20_80_ranged/data0.2/val --test_prefix=./nmt/temp/data20_80_ranged/data0.2/test --out_dir=./nmt/temp/model20_80_ranged/model0.2 --num_train_steps=30000 --steps_per_stats=100 --num_layers=2 --num_units=128 --dropout=0.2 --metrics=edit_distance --share_vocab=True --encoder_type=uni --steps_per_external_eval=500 --optimizer=adam --learning_rate=0.0001 --embed_size=5 --src_max_len=200 --tgt_max_len=200 --src_max_len_infer=200 --num_traces=1
 
