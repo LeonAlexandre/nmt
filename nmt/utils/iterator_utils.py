@@ -440,7 +440,7 @@ def get_iteratorNt(traces_dataset,
   src_tgt_dataset = src_tgt_dataset.map(
       lambda *x: (*(x), *(varg_get_size(x)))).prefetch(output_buffer_size)
 
-  def batching_func(x):
+  def batching_func(x,hparams):
     padded_shape = []
     for i in range(hparams.num_traces):
       padded_shape.append(tf.TensorShape([src_max_len]))  # Pad all sequences to the same length so RNN output has matching timesteps
@@ -492,7 +492,7 @@ def get_iteratorNt(traces_dataset,
 
   else:
   '''
-  batched_dataset = batching_func(src_tgt_dataset)
+  batched_dataset = batching_func(src_tgt_dataset,hparams)
 
   batched_iter = batched_dataset.make_initializable_iterator()
 
