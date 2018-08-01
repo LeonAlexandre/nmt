@@ -1,0 +1,11 @@
+# log_file=./nmt/temp/model20_250_ranged/model0.1/log_1533151668
+# Start step 500, lr 0.0001, Wed Aug  1 19:31:11 2018
+  step 600 lr 0.0001 step-time 1.46s wps 27.15K ppl 2.03 gN 27.68 edit_distance 2.33, Wed Aug  1 19:33:37 2018
+  step 700 lr 0.0001 step-time 1.50s wps 21.97K ppl 2.03 gN 25.38 edit_distance 2.33, Wed Aug  1 19:36:07 2018
+  step 800 lr 0.0001 step-time 1.49s wps 22.14K ppl 2.03 gN 21.34 edit_distance 2.33, Wed Aug  1 19:38:36 2018
+  step 900 lr 0.0001 step-time 1.46s wps 22.43K ppl 2.03 gN 23.99 edit_distance 2.33, Wed Aug  1 19:41:02 2018
+  step 1000 lr 0.0001 step-time 1.47s wps 22.35K ppl 2.03 gN 21.45 edit_distance 2.33, Wed Aug  1 19:43:29 2018
+  step 1100 lr 0.0001 step-time 1.48s wps 21.94K ppl 2.03 gN 20.58 edit_distance 2.28, Wed Aug  1 19:48:54 2018
+  step 1200 lr 0.0001 step-time 1.43s wps 22.93K ppl 2.03 gN 17.69 edit_distance 2.28, Wed Aug  1 19:51:18 2018
+  step 1300 lr 0.0001 step-time 1.49s wps 22.00K ppl 2.03 gN 20.92 edit_distance 2.28, Wed Aug  1 19:53:47 2018
+  step 1400 lr 0.0001 step-time 1.51s wps 21.74K ppl 2.03 gN 15.06 edit_distance 2.28, Wed Aug  1 19:56:18 2018
