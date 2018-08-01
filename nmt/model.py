@@ -352,7 +352,7 @@ class BaseModel(object):
       utils.print_out("  decoding maximum_iterations %d" % maximum_iterations)
     else:
       # TODO(thangluong): add decoding_length_factor flag
-      decoding_length_factor = 15.0
+      decoding_length_factor = 3.0
       max_encoder_length = tf.reduce_max(source_sequence_length)
       maximum_iterations = tf.to_int32(tf.round(
           tf.to_float(max_encoder_length) * decoding_length_factor))
