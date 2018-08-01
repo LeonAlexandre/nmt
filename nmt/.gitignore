@@ -4,4 +4,4 @@ bazel-out
 bazel-testlogs
 __pycache__
 utils/__pycache__
-__init__.pyc
+./__init__.pyc
