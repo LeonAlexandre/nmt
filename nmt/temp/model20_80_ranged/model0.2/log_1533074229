@@ -1,0 +1,7 @@
+# log_file=./nmt/temp/model20_80_ranged/model0.2/log_1533074229
+# Start step 23500, lr 0.0001, Tue Jul 31 14:57:20 2018
+  step 23600 lr 0.0001 step-time 0.47s wps 24.41K ppl 1.77 gN 46.94 edit_distance 0.24, Tue Jul 31 14:58:09 2018
+  step 23700 lr 0.0001 step-time 0.50s wps 23.33K ppl 1.77 gN 47.78 edit_distance 0.24, Tue Jul 31 14:58:59 2018
+  step 23800 lr 0.0001 step-time 0.50s wps 23.03K ppl 1.77 gN 50.03 edit_distance 0.24, Tue Jul 31 14:59:49 2018
+  step 23900 lr 0.0001 step-time 0.47s wps 24.43K ppl 1.77 gN 48.37 edit_distance 0.24, Tue Jul 31 15:00:37 2018
+  step 24000 lr 0.0001 step-time 0.48s wps 24.26K ppl 1.77 gN 50.96 edit_distance 0.24, Tue Jul 31 15:01:24 2018

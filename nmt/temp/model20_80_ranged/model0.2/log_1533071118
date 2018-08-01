@@ -1,0 +1,22 @@
+# log_file=./nmt/temp/model20_80_ranged/model0.2/log_1533071118
+# Start step 19000, lr 0.0001, Tue Jul 31 14:05:28 2018
+  step 19100 lr 0.0001 step-time 0.50s wps 24.32K ppl 1.80 gN 48.20 edit_distance 0.24, Tue Jul 31 14:06:19 2018
+  step 19200 lr 0.0001 step-time 0.48s wps 24.05K ppl 1.79 gN 47.02 edit_distance 0.24, Tue Jul 31 14:07:07 2018
+  step 19300 lr 0.0001 step-time 0.50s wps 23.16K ppl 1.79 gN 48.86 edit_distance 0.24, Tue Jul 31 14:07:57 2018
+  step 19400 lr 0.0001 step-time 0.48s wps 24.07K ppl 1.79 gN 43.73 edit_distance 0.24, Tue Jul 31 14:08:45 2018
+  step 19500 lr 0.0001 step-time 0.47s wps 24.66K ppl 1.79 gN 45.54 edit_distance 0.24, Tue Jul 31 14:09:32 2018
+  step 19600 lr 0.0001 step-time 0.49s wps 23.81K ppl 1.79 gN 45.53 edit_distance 0.24, Tue Jul 31 14:10:26 2018
+  step 19700 lr 0.0001 step-time 0.47s wps 24.44K ppl 1.79 gN 46.70 edit_distance 0.24, Tue Jul 31 14:11:14 2018
+  step 19800 lr 0.0001 step-time 0.53s wps 21.75K ppl 1.79 gN 48.00 edit_distance 0.24, Tue Jul 31 14:12:07 2018
+  step 19900 lr 0.0001 step-time 0.55s wps 21.20K ppl 1.79 gN 45.63 edit_distance 0.24, Tue Jul 31 14:13:02 2018
+  step 20000 lr 0.0001 step-time 0.55s wps 21.22K ppl 1.79 gN 45.04 edit_distance 0.24, Tue Jul 31 14:13:56 2018
+  step 20100 lr 0.0001 step-time 0.49s wps 23.39K ppl 1.79 gN 44.39 edit_distance 0.24, Tue Jul 31 14:14:59 2018
+  step 20200 lr 0.0001 step-time 0.49s wps 23.64K ppl 1.79 gN 46.17 edit_distance 0.24, Tue Jul 31 14:15:48 2018
+  step 20300 lr 0.0001 step-time 0.48s wps 24.14K ppl 1.79 gN 44.10 edit_distance 0.24, Tue Jul 31 14:16:36 2018
+  step 20400 lr 0.0001 step-time 0.56s wps 20.76K ppl 1.79 gN 48.69 edit_distance 0.24, Tue Jul 31 14:17:32 2018
+  step 20500 lr 0.0001 step-time 0.52s wps 22.45K ppl 1.79 gN 46.02 edit_distance 0.24, Tue Jul 31 14:18:23 2018
+  step 20600 lr 0.0001 step-time 0.47s wps 24.71K ppl 1.78 gN 44.33 edit_distance 0.24, Tue Jul 31 14:19:17 2018
+  step 20700 lr 0.0001 step-time 0.47s wps 24.91K ppl 1.79 gN 45.33 edit_distance 0.24, Tue Jul 31 14:20:03 2018
+  step 20800 lr 0.0001 step-time 0.48s wps 24.28K ppl 1.78 gN 47.57 edit_distance 0.24, Tue Jul 31 14:20:51 2018
+  step 20900 lr 0.0001 step-time 0.48s wps 24.33K ppl 1.78 gN 44.39 edit_distance 0.24, Tue Jul 31 14:21:39 2018
+  step 21000 lr 0.0001 step-time 0.48s wps 23.90K ppl 1.78 gN 47.07 edit_distance 0.24, Tue Jul 31 14:22:27 2018
