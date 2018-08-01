@@ -17,23 +17,22 @@ def parse_argument():
 
 def calculateDelta(trace_file,label_file):
 
-	__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+	__location__ = os.getcwd()
 
-    trace_file = os.path.join(__location__, trace_file)
-    label_file = os.path.join(__location__, label_file)
+	trace_file = os.path.join(__location__, trace_file)
+	label_file = os.path.join(__location__, label_file)
 
-    with open(trace_file) as trace:
-    	with open(label_file) as label:
+	with open(trace_file) as trace:
+		with open(label_file) as label:
 
-    		num_seq = sum(1 for line in trace)
-    		trace.seek(0)
+			num_seq = sum(1 for line in trace)
+			trace.seek(0)
 
-    		delta = 0
-    		for (trace_line, label_line) in zip(trace,label):
-    			delta += (len(label_line) - len(trace_line)) / len(label_line)
+			delta = 0
+			for (trace_line, label_line) in zip(trace,label):
+				delta += (len(label_line) - len(trace_line)) / len(label_line)
 
-   	return delta / num_seq
+	return delta / num_seq
 
 
 def main():
@@ -43,6 +42,7 @@ def main():
 	label_file = args.label
 
 	print(calculateDelta(trace_file,label_file))
+
 
 
 if __name__ == "__main__":
