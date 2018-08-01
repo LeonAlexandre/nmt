@@ -1,5 +1,0 @@
-# log_file=./nmt/temp/model10_30/model0.3/log_1532977448
-# Start step 0, lr 0.0001, Mon Jul 30 12:04:39 2018
-  step 100 lr 0.0001 step-time 0.21s wps 21.68K ppl 3.18 gN 9.10 edit_distance 300.00, hamming_distance 15.49, Mon Jul 30 12:04:59 2018
-  step 200 lr 0.0001 step-time 0.19s wps 24.17K ppl 2.18 gN 6.02 edit_distance 300.00, hamming_distance 15.49, Mon Jul 30 12:05:18 2018
-  step 300 lr 0.0001 step-time 0.19s wps 23.09K ppl 2.10 gN 21.34 edit_distance 300.00, hamming_distance 15.49, Mon Jul 30 12:05:57 2018

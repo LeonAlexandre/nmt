@@ -1,5 +1,0 @@
-# log_file=./nmt/temp/model10_30/model0.3\log_1532986021
-# Start step 30000, lr nan, Mon Jul 30 14:27:10 2018
-# Final, step 30000 lr nan step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.76, dev edit_distance 0.25, dev hamming_distance 0.35, test ppl 1.75, test edit_distance 0.25, test hamming_distance 0.35, Mon Jul 30 14:27:17 2018
-# Best edit_distance, step 17000 lr nan step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.72, dev edit_distance 0.25, dev hamming_distance 0.34, test ppl 1.72, test edit_distance 0.25, test hamming_distance 0.34, Mon Jul 30 14:27:24 2018
-# Best hamming_distance, step 15000 lr nan step-time 0.00s wps 0.00K ppl 0.00 gN 0.00 dev ppl 1.72, dev edit_distance 0.25, dev hamming_distance 0.34, test ppl 1.72, test edit_distance 0.25, test hamming_distance 0.34, Mon Jul 30 14:27:30 2018

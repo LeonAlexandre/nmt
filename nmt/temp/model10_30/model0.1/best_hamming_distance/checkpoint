@@ -1,3 +1,0 @@
-model_checkpoint_path: "translate.ckpt-25500"
-all_model_checkpoint_paths: "../best_edit_distance/translate.ckpt-25500"
-all_model_checkpoint_paths: "translate.ckpt-25500"
