@@ -1,0 +1,4 @@
+# log_file=./nmt/temp/model20_250_ranged_luong/model0.2\log_1533236710
+# Start step 0, lr 0.0001, Thu Aug  2 12:10:49 2018
+  step 100 lr 0.0001 step-time 2.27s wps 13.79K ppl 2.56 gN 91.42 edit_distance 1.49, Thu Aug  2 12:14:36 2018
+  step 200 lr 0.0001 step-time 2.23s wps 13.97K ppl 2.07 gN 45.99 edit_distance 1.49, Thu Aug  2 12:18:19 2018
