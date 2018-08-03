@@ -571,7 +571,7 @@ def create_or_load_hparams(flags,
         if flags.inference_input_file != None:
           pass
         else:
-          abort()
+          sys.exit("Can not find best_%s_dir" % metric)
 
 
   # Print HParams
@@ -625,7 +625,8 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             ref_file,
             trans_file,
             metric,
-            hparams.subword_option)
+            hparams.subword_option,
+            flags.inference_input_file)
         utils.print_out("  %s: %.2f" % (metric, np.abs(score)))
         
   elif flags.inference_input_prefix:
