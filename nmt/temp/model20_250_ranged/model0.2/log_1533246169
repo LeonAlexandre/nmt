@@ -1,0 +1,54 @@
+# log_file=./nmt/temp/model20_250_ranged/model0.2/log_1533246169
+# Start step 10000, lr 0.0001, Thu Aug  2 21:44:04 2018
+  step 10100 lr 0.0001 step-time 1.24s wps 25.33K ppl 1.99 gN 87.01 edit_distance 0.32, Thu Aug  2 21:46:07 2018
+  step 10200 lr 0.0001 step-time 1.22s wps 25.32K ppl 1.99 gN 105.62 edit_distance 0.32, Thu Aug  2 21:48:10 2018
+  step 10300 lr 0.0001 step-time 1.23s wps 25.37K ppl 1.99 gN 101.51 edit_distance 0.32, Thu Aug  2 21:50:13 2018
+  step 10400 lr 0.0001 step-time 1.22s wps 25.41K ppl 1.99 gN 94.70 edit_distance 0.32, Thu Aug  2 21:52:15 2018
+  step 10500 lr 0.0001 step-time 1.23s wps 25.37K ppl 1.99 gN 114.55 edit_distance 0.32, Thu Aug  2 21:54:18 2018
+  step 10600 lr 0.0001 step-time 1.22s wps 25.39K ppl 1.99 gN 96.23 edit_distance 0.31, Thu Aug  2 21:57:10 2018
+  step 10700 lr 0.0001 step-time 1.22s wps 25.50K ppl 1.99 gN 108.95 edit_distance 0.31, Thu Aug  2 21:59:12 2018
+  step 10800 lr 0.0001 step-time 1.20s wps 25.94K ppl 1.99 gN 100.31 edit_distance 0.31, Thu Aug  2 22:01:12 2018
+  step 10900 lr 0.0001 step-time 1.21s wps 25.78K ppl 1.99 gN 114.91 edit_distance 0.31, Thu Aug  2 22:03:14 2018
+  step 11000 lr 0.0001 step-time 1.21s wps 25.68K ppl 1.99 gN 112.15 edit_distance 0.31, Thu Aug  2 22:05:14 2018
+  step 11100 lr 0.0001 step-time 1.20s wps 25.87K ppl 1.99 gN 106.93 edit_distance 0.31, Thu Aug  2 22:08:29 2018
+  step 11200 lr 0.0001 step-time 1.22s wps 25.61K ppl 1.99 gN 89.94 edit_distance 0.31, Thu Aug  2 22:10:31 2018
+  step 11300 lr 0.0001 step-time 1.21s wps 25.57K ppl 1.99 gN 96.43 edit_distance 0.31, Thu Aug  2 22:12:32 2018
+  step 11400 lr 0.0001 step-time 1.21s wps 25.80K ppl 1.99 gN 111.14 edit_distance 0.31, Thu Aug  2 22:14:33 2018
+  step 11500 lr 0.0001 step-time 1.23s wps 25.25K ppl 1.99 gN 103.07 edit_distance 0.31, Thu Aug  2 22:16:36 2018
+  step 11600 lr 0.0001 step-time 1.27s wps 24.59K ppl 1.98 gN 102.70 edit_distance 0.31, Thu Aug  2 22:19:34 2018
+  step 11700 lr 0.0001 step-time 1.28s wps 24.21K ppl 1.98 gN 90.83 edit_distance 0.31, Thu Aug  2 22:21:42 2018
+  step 11800 lr 0.0001 step-time 1.27s wps 24.42K ppl 1.98 gN 95.67 edit_distance 0.31, Thu Aug  2 22:23:49 2018
+  step 11900 lr 0.0001 step-time 1.26s wps 24.80K ppl 1.98 gN 92.27 edit_distance 0.31, Thu Aug  2 22:25:55 2018
+  step 12000 lr 0.0001 step-time 1.26s wps 24.42K ppl 1.98 gN 101.56 edit_distance 0.31, Thu Aug  2 22:28:02 2018
+  step 12100 lr 0.0001 step-time 1.27s wps 24.50K ppl 1.98 gN 93.58 edit_distance 0.30, Thu Aug  2 22:31:32 2018
+  step 12200 lr 0.0001 step-time 1.26s wps 24.74K ppl 1.98 gN 90.50 edit_distance 0.30, Thu Aug  2 22:33:38 2018
+  step 12300 lr 0.0001 step-time 1.27s wps 24.39K ppl 1.98 gN 96.30 edit_distance 0.30, Thu Aug  2 22:35:46 2018
+  step 12400 lr 0.0001 step-time 1.28s wps 24.46K ppl 1.98 gN 94.32 edit_distance 0.30, Thu Aug  2 22:37:53 2018
+  step 12500 lr 0.0001 step-time 1.27s wps 24.39K ppl 1.98 gN 89.82 edit_distance 0.30, Thu Aug  2 22:40:00 2018
+  step 12600 lr 0.0001 step-time 1.26s wps 24.53K ppl 1.98 gN 99.01 edit_distance 0.30, Thu Aug  2 22:42:58 2018
+  step 12700 lr 0.0001 step-time 1.26s wps 24.67K ppl 1.98 gN 90.20 edit_distance 0.30, Thu Aug  2 22:45:05 2018
+  step 12800 lr 0.0001 step-time 1.27s wps 24.42K ppl 1.98 gN 89.26 edit_distance 0.30, Thu Aug  2 22:47:12 2018
+  step 12900 lr 0.0001 step-time 1.25s wps 24.84K ppl 1.98 gN 105.17 edit_distance 0.30, Thu Aug  2 22:49:17 2018
+  step 13000 lr 0.0001 step-time 1.27s wps 24.61K ppl 1.98 gN 102.88 edit_distance 0.30, Thu Aug  2 22:51:24 2018
+  step 13100 lr 0.0001 step-time 1.27s wps 24.48K ppl 1.98 gN 86.29 edit_distance 0.30, Thu Aug  2 22:54:51 2018
+  step 13200 lr 0.0001 step-time 1.27s wps 24.49K ppl 1.98 gN 87.65 edit_distance 0.30, Thu Aug  2 22:56:59 2018
+  step 13300 lr 0.0001 step-time 1.26s wps 24.62K ppl 1.98 gN 89.88 edit_distance 0.30, Thu Aug  2 22:59:05 2018
+  step 13400 lr 0.0001 step-time 1.27s wps 24.44K ppl 1.98 gN 85.34 edit_distance 0.30, Thu Aug  2 23:01:12 2018
+  step 13500 lr 0.0001 step-time 1.27s wps 24.37K ppl 1.98 gN 85.14 edit_distance 0.30, Thu Aug  2 23:03:20 2018
+  step 13600 lr 0.0001 step-time 1.27s wps 24.41K ppl 1.98 gN 84.80 edit_distance 0.30, Thu Aug  2 23:06:19 2018
+  step 13700 lr 0.0001 step-time 1.25s wps 24.94K ppl 1.98 gN 83.94 edit_distance 0.30, Thu Aug  2 23:08:24 2018
+  step 13800 lr 0.0001 step-time 1.27s wps 24.58K ppl 1.98 gN 86.33 edit_distance 0.30, Thu Aug  2 23:10:31 2018
+  step 13900 lr 0.0001 step-time 1.27s wps 24.43K ppl 1.98 gN 86.14 edit_distance 0.30, Thu Aug  2 23:12:37 2018
+  step 14000 lr 0.0001 step-time 1.26s wps 24.65K ppl 1.98 gN 79.55 edit_distance 0.30, Thu Aug  2 23:14:44 2018
+  step 14100 lr 0.0001 step-time 1.26s wps 24.63K ppl 1.98 gN 83.42 edit_distance 0.30, Thu Aug  2 23:18:11 2018
+  step 14200 lr 0.0001 step-time 1.26s wps 24.56K ppl 1.98 gN 82.02 edit_distance 0.30, Thu Aug  2 23:20:18 2018
+  step 14300 lr 0.0001 step-time 1.26s wps 24.62K ppl 1.98 gN 84.43 edit_distance 0.30, Thu Aug  2 23:22:24 2018
+  step 14400 lr 0.0001 step-time 1.26s wps 24.88K ppl 1.97 gN 83.85 edit_distance 0.30, Thu Aug  2 23:24:30 2018
+  step 14500 lr 0.0001 step-time 1.27s wps 24.58K ppl 1.98 gN 90.23 edit_distance 0.30, Thu Aug  2 23:26:36 2018
+  step 14600 lr 0.0001 step-time 1.27s wps 24.47K ppl 1.97 gN 96.51 edit_distance 0.30, Thu Aug  2 23:29:34 2018
+  step 14700 lr 0.0001 step-time 1.27s wps 24.41K ppl 1.97 gN 84.01 edit_distance 0.30, Thu Aug  2 23:31:42 2018
+  step 14800 lr 0.0001 step-time 1.26s wps 24.51K ppl 1.97 gN 81.25 edit_distance 0.30, Thu Aug  2 23:33:48 2018
+  step 14900 lr 0.0001 step-time 1.27s wps 24.58K ppl 1.97 gN 79.94 edit_distance 0.30, Thu Aug  2 23:35:55 2018
+  step 15000 lr 0.0001 step-time 1.27s wps 24.57K ppl 1.97 gN 78.65 edit_distance 0.30, Thu Aug  2 23:38:01 2018
+# Final, step 15000 lr 0.0001 step-time 1.27s wps 24.57K ppl 1.97 gN 78.65 dev ppl 1.96, dev edit_distance 0.30, test ppl 1.96, test edit_distance 0.30, Thu Aug  2 23:40:42 2018
+# Best edit_distance, step 15000 lr 0.0001 step-time 1.27s wps 24.57K ppl 1.97 gN 78.65 dev ppl 1.96, dev edit_distance 0.30, test ppl 1.96, test edit_distance 0.30, Thu Aug  2 23:42:02 2018

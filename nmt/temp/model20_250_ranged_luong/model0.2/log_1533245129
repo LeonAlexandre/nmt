@@ -1,0 +1,9 @@
+# log_file=./nmt/temp/model20_250_ranged_luong/model0.2/log_1533245129
+# Start step 0, lr 0.0001, Thu Aug  2 21:26:15 2018
+  step 100 lr 0.0001 step-time 1.23s wps 25.46K ppl 2.99 gN 104.83 edit_distance 0.97, Thu Aug  2 21:28:18 2018
+  step 200 lr 0.0001 step-time 1.22s wps 25.55K ppl 2.08 gN 8.67 edit_distance 0.97, Thu Aug  2 21:30:20 2018
+  step 300 lr 0.0001 step-time 1.22s wps 25.30K ppl 2.07 gN 13.65 edit_distance 0.97, Thu Aug  2 21:32:22 2018
+  step 400 lr 0.0001 step-time 1.22s wps 25.40K ppl 2.05 gN 30.29 edit_distance 0.97, Thu Aug  2 21:34:25 2018
+  step 500 lr 0.0001 step-time 1.23s wps 25.26K ppl 2.04 gN 37.78 edit_distance 0.97, Thu Aug  2 21:36:28 2018
+  step 600 lr 0.0001 step-time 1.23s wps 25.38K ppl 2.04 gN 44.86 edit_distance 0.97, Thu Aug  2 21:39:58 2018
+  step 700 lr 0.0001 step-time 1.22s wps 25.54K ppl 2.04 gN 38.75 edit_distance 0.97, Thu Aug  2 21:42:00 2018
