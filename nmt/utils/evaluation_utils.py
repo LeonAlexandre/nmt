@@ -100,7 +100,7 @@ def _avg_delta(out_file, inp_file):
 def _edit_distance(ref_file, predict_file):
 
   '''
-  Computes the edit_distance averaged over the total number of sequences in the files
+  Computes the normalized edit_distance averaged over the total number of sequences in the files
   Returns the negative of the average distance to be compatible with the code base, specifically trying to maximize a given metric
   '''
 
@@ -116,7 +116,9 @@ def _edit_distance(ref_file, predict_file):
           predict_line = predict_line.strip()
           ref_line = ref_line.replace(" ","")
           predict_line = predict_line.replace(" ","")
-          ed_dis += lv.distance(ref_line,predict_line)
+          norm_ed = lv.distance(ref_line,predict_line) / len(ref_line)
+          ed_dis += norm_ed
+
           #print("Label: " + ref_line)
           #print("Prediction: " + predict_line)
 
@@ -127,8 +129,10 @@ def _edit_distance(ref_file, predict_file):
 def _hamming_distance(ref_file, predict_file):
 
   '''
-  Computes the hamming distance average over the total number of sequences in the files
-  Because the hamming distance is not defined for sequences of different lengths
+  For every sequence, compute the normalized hamming distance.
+  Return normalized hamming distance averaged over all the sequences
+  Because the hamming distance is not defined for sequences of different lengths,
+  padding and truncating is used.
   '''
 
   with codecs.getreader("utf-8")(tf.gfile.GFile(ref_file,"rb")) as ref_fh:
@@ -165,7 +169,7 @@ def _hamming_distance(ref_file, predict_file):
             print("Network output shorter than target on line #%d, padding to target length with \'1\'" % line_number)
             num_printed += 1
 
-        hdis += sum(predict_sym != ref_sym for (predict_sym, ref_sym) in zip(predict_line, ref_line))
+        hdis += sum(predict_sym != ref_sym for (predict_sym, ref_sym) in zip(predict_line, ref_line)) / len_ref
     
   avg = -1 * hdis / num_lines
   return avg

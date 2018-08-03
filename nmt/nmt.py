@@ -54,10 +54,6 @@ def add_arguments(parser):
       For gnmt, we build 1 bi-directional layer, and (num_encoder_layers - 1)
         uni-directional layers.\
       """)
-  parser.add_argument("--training_helper", type=str, default="tf",
-                      help="""Type of decoder helper used during training time.\
-                      tf - teacher forcing | so - scheduled output sampling | se - scheduled embedding sampling\
-                      """)
   parser.add_argument("--residual", type="bool", nargs="?", const=True,
                       default=False,
                       help="Whether to add residual connections.")
@@ -246,7 +242,7 @@ def add_arguments(parser):
   parser.add_argument("--override_loaded_hparams", type="bool", nargs="?",
                       const=True, default=False,
                       help="Override loaded hparams with values specified")
-  parser.add_argument("--num_keep_ckpts", type=int, default=1,
+  parser.add_argument("--num_keep_ckpts", type=int, default=3,
                       help="Max number of checkpoints to keep.")
   parser.add_argument("--avg_ckpts", type="bool", nargs="?",
                       const=True, default=False, help=("""\
@@ -329,7 +325,6 @@ def create_hparams(flags):
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
       num_traces = flags.num_traces,
-      training_helper=flags.training_helper,
 
 
       # Attention mechanisms
@@ -551,9 +546,10 @@ def ensure_compatible_hparams(hparams, default_hparams, hparams_path):
   return hparams
 
 
-def create_or_load_hparams(
+def create_or_load_hparams(flags,
     out_dir, default_hparams, hparams_path, save_hparams=True):
   """Create hparams or load hparams from out_dir."""
+  metrics = default_hparams.metrics
   hparams = utils.load_hparams(out_dir)
   if not hparams:
     hparams = default_hparams
@@ -563,11 +559,20 @@ def create_or_load_hparams(
   else:
     hparams = ensure_compatible_hparams(hparams, default_hparams, hparams_path)
 
+  hparams.metrics = metrics
+
   # Save HParams
   if save_hparams:
     utils.save_hparams(out_dir, hparams)
     for metric in hparams.metrics:
-      utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      try: 
+        utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      except AttributeError:
+        if flags.inference_input_file != None:
+          pass
+        else:
+          sys.exit("Can not find best_%s_dir" % metric)
+
 
   # Print HParams
   utils.print_hparams(hparams)
@@ -594,7 +599,7 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
   if not tf.gfile.Exists(out_dir): tf.gfile.MakeDirs(out_dir)
 
   # Load hparams.
-  hparams = create_or_load_hparams(
+  hparams = create_or_load_hparams(flags, 
       out_dir, default_hparams, flags.hparams_path, save_hparams=(jobid == 0))
 
   if flags.inference_input_file:
@@ -621,8 +626,8 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             trans_file,
             metric,
             hparams.subword_option,
-            inp_file=flags.inference_input_file)
-        utils.print_out("  %s: %.1f" % (metric, score))
+            flags.inference_input_file)
+        utils.print_out("  %s: %.2f" % (metric, np.abs(score)))
         
   elif flags.inference_input_prefix:
     hparams.inference_indices = None

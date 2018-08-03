@@ -19,3 +19,26 @@ tput_file=./infer_20_using_100_model/test20_0.4_infer --inference_ref_file=./nmt
 
 
 python -m nmt.nmt --src=trace --tgt=label --vocab_prefix=./nmt/temp/binary_seq_vocab/vocab --train_prefix=./nmt/temp/data20_250_ranged/data0.2/train --dev_prefix=./nmt/temp/data20_250_ranged/data0.2/val --test_prefix=./nmt/temp/data20_250_ranged/data0.2/test --out_dir=./nmt/temp/model20_250_ranged_se/model0.2 --num_train_steps=10000 --steps_per_stats=100 --num_layers=2 --num_units=128 --dropout=0.2 --metrics=edit_distance --share_vocab=True --encoder_type=uni --steps_per_external_eval=500 --optimizer=adam --learning_rate=0.0001 --embed_size=5 --src_max_len=300 --tgt_max_len=300 --src_max_len_infer=500 --num_traces=1
+
+def _avg_delta(out_file, inp_file):
+  '''
+  *** Only used during external inference ***
+  Computes the average delta, which is the average deletion probability that transforms the output length back into the input lengths.
+  This tells us how well the network can generalize lengths given some delta.
+  If the calculated delta is larger than the known delta, then the network thinks more symbols are missing than there are in reality.
+  If the calculated delta is smaller than the known delta, then the network thinks less symbols are missing than there are in reality.
+  The calculated delta can no be larger than 1.
+  But the calculated delta can be negative, if the network output is shorter than the input.
+  '''
+
+  with codecs.getreader("utf-8")(tf.gfile.GFile(out_file,"rb")) as out_fh:
+    with codecs.getreader("utf-8")(tf.gfile.GFile(inp_file,"rb")) as inp_fh:
+
+      num_lines = sum(1 for line in out_fh)
+      out_fh.seek(0)
+
+      delta = 0
+      for (inp_line, out_line) in zip(inp_fh, out_fh):
+        delta += (len(out_line) - len(inp_line)) / len(out_line)
+
+  return delta / num_lines
