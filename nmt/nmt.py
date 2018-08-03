@@ -620,7 +620,8 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             ref_file,
             trans_file,
             metric,
-            hparams.subword_option)
+            hparams.subword_option,
+            inp_file=flags.inference_input_file)
         utils.print_out("  %s: %.1f" % (metric, score))
         
   elif flags.inference_input_prefix:

@@ -32,7 +32,7 @@ import Levenshtein as lv
 __all__ = ["evaluate"]
 
 
-def evaluate(ref_file, trans_file, metric, subword_option=None):
+def evaluate(ref_file, trans_file, metric, subword_option=None, inp_file=None):
   """Pick a metric and evaluate depending on task."""
   # BLEU scores for translation task
   if metric.lower() == "bleu":
@@ -50,6 +50,8 @@ def evaluate(ref_file, trans_file, metric, subword_option=None):
     evaluation_score = _edit_distance(ref_file, trans_file)
   elif metric.lower() == "hamming_distance":
     evaluation_score = _hamming_distance(ref_file, trans_file)
+  elif metric.lower() == "avg_delta":
+    evaluation_score = _avg_delta(trans_file, inp_file)
   else:
     raise ValueError("Unknown metric %s" % metric)
 
@@ -69,6 +71,30 @@ def _clean(sentence, subword_option):
     sentence = u"".join(sentence.split()).replace(u"\u2581", u" ").lstrip()
 
   return sentence
+
+
+def _avg_delta(out_file, inp_file):
+  '''
+  *** Only used during external inference ***
+  Computes the average delta, which is the average deletion probability that transforms the output length back into the input lengths.
+  This tells us how well the network can generalize lengths given some delta.
+  If the calculated delta is larger than the known delta, then the network thinks more symbols are missing than there are in reality.
+  If the calculated delta is smaller than the known delta, then the network thinks less symbols are missing than there are in reality.
+  The calculated delta can no be larger than 1.
+  But the calculated delta can be negative, if the network output is shorter than the input.
+  '''
+
+  with codecs.getreader("utf-8")(tf.gfile.GFile(out_file,"rb")) as out_fh:
+    with codecs.getreader("utf-8")(tf.gfile.GFile(inp_file,"rb")) as inp_fh:
+
+      num_lines = sum(1 for line in out_fh)
+      out_fh.seek(0)
+
+      delta = 0
+      for (inp_line, out_line) in zip(inp_fh, out_fh):
+        delta += (len(out_line) - len(inp_line)) / len(out_line)
+
+  return delta / num_lines
 
 
 def _edit_distance(ref_file, predict_file):
