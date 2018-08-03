@@ -395,10 +395,32 @@ class BaseModel(object):
         decoder_emb_inp = tf.nn.embedding_lookup(
             self.embedding_decoder, target_input)
 
-        # Helper
-        helper = tf.contrib.seq2seq.TrainingHelper(
-            decoder_emb_inp, iterator.target_sequence_length,
-            time_major=self.time_major)
+        if hparams.training_helper == "tf":
+          # Teacher forcing helper
+          # Simply feeds in the ground truth to the decoder
+          helper = tf.contrib.seq2seq.TrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              time_major=self.time_major)
+          utils.print_out("# Using teacher forcing to train decoder.")
+        elif hparams.training_helper == "se":
+          # Scheduled embedding
+          # Takes previous network output logits, then samples from that distribution
+          helper = tf.contrib.seq2seq.ScheduledEmbeddingTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              embedding=self.embedding_decoder, 
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out("# Using scheduled embedding sampling to train decoder.")
+        elif hparams.training_helper == "so":
+          # Scheduled output
+          # Takes previous network output id, then feed it into the next decoding step
+          helper = tf.contrib.seq2seq.ScheduledOutputTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out("# Using scheduled output sampling to train decoder.")
+        else:
+          raise ValueError("Unknown decoder training helper: %s" % hparams.training_helper)
 
         # Decoder
         my_decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -1075,10 +1097,32 @@ class ModelNt(BaseModel):
         decoder_emb_inp = tf.nn.embedding_lookup(
             self.embedding_decoder, target_input)
 
-        # Helper
-        helper = tf.contrib.seq2seq.TrainingHelper(
-            decoder_emb_inp, iterator.target_sequence_length,
-            time_major=self.time_major)
+        if hparams.training_helper == "tf":
+          # Teacher forcing helper
+          # Simply feeds in the ground truth to the decoder
+          helper = tf.contrib.seq2seq.TrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              time_major=self.time_major)
+          utils.print_out(" Using teacher forcing to train decoder.")
+        elif hparams.training_helper == "se":
+          # Scheduled embedding
+          # Takes previous network output logits, then samples from that distribution
+          helper = tf.contrib.seq2seq.ScheduledEmbeddingTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              embedding=self.embedding_decoder, 
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out(" Using scheduled embedding sampling to train decoder.")
+        elif hparams.training_helper == "so":
+          # Scheduled output
+          # Takes previous network output id, then feed it into the next decoding step
+          helper = tf.contrib.seq2seq.ScheduledOutputTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out(" Using scheduled output sampling to train decoder.")
+        else:
+          raise ValueError("Unknown decoder training helper: %s" % hparams.training_helper)
 
         # Decoder
         my_decoder = tf.contrib.seq2seq.BasicDecoder(

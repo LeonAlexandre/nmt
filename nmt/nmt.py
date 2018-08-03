@@ -54,6 +54,10 @@ def add_arguments(parser):
       For gnmt, we build 1 bi-directional layer, and (num_encoder_layers - 1)
         uni-directional layers.\
       """)
+  parser.add_argument("--training_helper", type=str, default="tf",
+                      help="""Type of decoder helper used during training time.\
+                      tf - teacher forcing | so - scheduled output sampling | se - scheduled embedding sampling\
+                      """)
   parser.add_argument("--residual", type="bool", nargs="?", const=True,
                       default=False,
                       help="Whether to add residual connections.")
@@ -325,6 +329,7 @@ def create_hparams(flags):
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
       num_traces = flags.num_traces,
+      training_helper=flags.training_helper,
 
 
       # Attention mechanisms
