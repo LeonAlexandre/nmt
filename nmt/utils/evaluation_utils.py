@@ -92,6 +92,10 @@ def _avg_delta(out_file, inp_file):
 
       delta = 0
       for (inp_line, out_line) in zip(inp_fh, out_fh):
+        inp_line = inp_line.strip()
+        inp_line = inp_line.replace(" ","")
+        out_line = out_line.strip()
+        out_line = out_line.replace(" ","")
         delta += (len(out_line) - len(inp_line)) / len(out_line)
 
   return delta / num_lines
