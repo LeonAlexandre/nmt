@@ -84,7 +84,7 @@ def decode_and_evaluate(name,
           metric,
           subword_option=subword_option)
       evaluation_scores[metric] = score
-      utils.print_out("  %s %s: %.1f" % (metric, name, np.abs(score)))
+      utils.print_out("  %s %s: %.2f" % (metric, name, np.abs(score)))
 
   return evaluation_scores
 

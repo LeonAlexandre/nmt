@@ -62,6 +62,8 @@ def add_arguments(parser):
                       help="Whether to use time-major mode for dynamic RNN.")
   parser.add_argument("--num_embeddings_partitions", type=int, default=0,
                       help="Number of partitions for embedding vars.")
+  parser.add_argument("--num_traces", type=int, default=1, 
+                      help="Number of traces per traget sequence.")
 
   # attention mechanisms
   parser.add_argument("--attention", type=str, default="", help="""\
@@ -136,6 +138,12 @@ def add_arguments(parser):
   # data
   parser.add_argument("--src", type=str, default=None,
                       help="Source suffix, e.g., en.")
+  '''
+  parser.add_argument("--trace0", type=str, default=None,
+                      help="Trace0 file suffix, e.g., t0.")
+  parser.add_argument("--trace1", type=str, default=None,
+                      help="Trace1 file suffix, e.g., t1.")
+  '''
   parser.add_argument("--tgt", type=str, default=None,
                       help="Target suffix, e.g., de.")
   parser.add_argument("--train_prefix", type=str, default=None,
@@ -170,6 +178,7 @@ def add_arguments(parser):
                       Whether check special sos, eos, unk tokens exist in the
                       vocab files.\
                       """)
+  parser.add_argument("--embed_size", type=int, default=128)
 
   # Sequence lengths
   parser.add_argument("--src_max_len", type=int, default=50,
@@ -200,7 +209,7 @@ def add_arguments(parser):
                             "Save checkpoint every 10x steps_per_stats"))
   parser.add_argument("--max_train", type=int, default=0,
                       help="Limit on the size of training data (0: no limit).")
-  parser.add_argument("--num_buckets", type=int, default=5,
+  parser.add_argument("--num_buckets", type=int, default=1,
                       help="Put data into similar-length buckets.")
 
   # SPM
@@ -233,7 +242,7 @@ def add_arguments(parser):
   parser.add_argument("--override_loaded_hparams", type="bool", nargs="?",
                       const=True, default=False,
                       help="Override loaded hparams with values specified")
-  parser.add_argument("--num_keep_ckpts", type=int, default=1,
+  parser.add_argument("--num_keep_ckpts", type=int, default=3,
                       help="Max number of checkpoints to keep.")
   parser.add_argument("--avg_ckpts", type="bool", nargs="?",
                       const=True, default=False, help=("""\
@@ -249,6 +258,8 @@ def add_arguments(parser):
   parser.add_argument("--inference_list", type=str, default=None,
                       help=("A comma-separated list of sentence indices "
                             "(0-based) to decode."))
+  parser.add_argument("--inference_input_prefix", type=str, default=None,
+                      help="Prefix for inference input files, used for multi-encoder architecture.")
   parser.add_argument("--infer_batch_size", type=int, default=32,
                       help="Batch size for inference mode.")
   parser.add_argument("--inference_output_file", type=str, default=None,
@@ -292,6 +303,8 @@ def create_hparams(flags):
   return tf.contrib.training.HParams(
       # Data
       src=flags.src,
+      #trace0=flags.trace0,
+      #trace1=flags.trace1,
       tgt=flags.tgt,
       train_prefix=flags.train_prefix,
       dev_prefix=flags.dev_prefix,
@@ -311,6 +324,8 @@ def create_hparams(flags):
       residual=flags.residual,
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
+      num_traces = flags.num_traces,
+
 
       # Attention mechanisms
       attention=flags.attention,
@@ -351,6 +366,7 @@ def create_hparams(flags):
       eos=flags.eos if flags.eos else vocab_utils.EOS,
       subword_option=flags.subword_option,
       check_special_token=flags.check_special_token,
+      embed_size = flags.embed_size,
 
       # Misc
       forget_bias=flags.forget_bias,
@@ -414,9 +430,14 @@ def extend_hparams(hparams):
   if hparams.subword_option and hparams.subword_option not in ["spm", "bpe"]:
     raise ValueError("subword option must be either spm, or bpe")
 
+  if hparams.num_traces != 1:
+    hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+
   # Flags
   utils.print_out("# hparams:")
   utils.print_out("  src=%s" % hparams.src)
+  #utils.print_out("  trace0=%s" % hparams.trace0)
+  #utils.print_out("  trace1=%s" % hparams.trace1)
   utils.print_out("  tgt=%s" % hparams.tgt)
   utils.print_out("  train_prefix=%s" % hparams.train_prefix)
   utils.print_out("  dev_prefix=%s" % hparams.dev_prefix)
@@ -492,6 +513,11 @@ def extend_hparams(hparams):
       hparams.add_hparam("avg_best_" + metric + "_dir", best_metric_dir)
       tf.gfile.MakeDirs(best_metric_dir)
 
+  print("Num metrics: %d" % len(hparams.metrics))
+  print("Num keep ckpt: %d" % hparams.num_keep_ckpts)
+  if len(hparams.metrics) > hparams.num_keep_ckpts:
+    setattr(hparams, "num_keep_ckpts", len(hparams.metrics))
+
   return hparams
 
 
@@ -516,12 +542,14 @@ def ensure_compatible_hparams(hparams, default_hparams, hparams_path):
                         (key, str(getattr(hparams, key)),
                          str(default_config[key])))
         setattr(hparams, key, default_config[key])
+
   return hparams
 
 
-def create_or_load_hparams(
+def create_or_load_hparams(flags,
     out_dir, default_hparams, hparams_path, save_hparams=True):
   """Create hparams or load hparams from out_dir."""
+  metrics = default_hparams.metrics
   hparams = utils.load_hparams(out_dir)
   if not hparams:
     hparams = default_hparams
@@ -531,11 +559,20 @@ def create_or_load_hparams(
   else:
     hparams = ensure_compatible_hparams(hparams, default_hparams, hparams_path)
 
+  hparams.metrics = metrics
+
   # Save HParams
   if save_hparams:
     utils.save_hparams(out_dir, hparams)
     for metric in hparams.metrics:
-      utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      try: 
+        utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      except AttributeError:
+        if flags.inference_input_file != None:
+          pass
+        else:
+          sys.exit("Can not find best_%s_dir" % metric)
+
 
   # Print HParams
   utils.print_hparams(hparams)
@@ -562,7 +599,7 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
   if not tf.gfile.Exists(out_dir): tf.gfile.MakeDirs(out_dir)
 
   # Load hparams.
-  hparams = create_or_load_hparams(
+  hparams = create_or_load_hparams(flags, 
       out_dir, default_hparams, flags.hparams_path, save_hparams=(jobid == 0))
 
   if flags.inference_input_file:
@@ -588,8 +625,19 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             ref_file,
             trans_file,
             metric,
-            hparams.subword_option)
-        utils.print_out("  %s: %.1f" % (metric, score))
+            hparams.subword_option,
+            flags.inference_input_file)
+        utils.print_out("  %s: %.2f" % (metric, np.abs(score)))
+        
+  elif flags.inference_input_prefix:
+    hparams.inference_indices = None
+    # Do multi-encoder inference
+    trans_file = flags.inference_output_file
+    ckpt = flags.ckpt
+    if not ckpt:
+      ckpt = tf.train.latest_checkpoint(out_dir)
+    inference_fn(ckpt,flags.inference_input_prefix,
+                 trans_file, hparams, num_workers, jobid)
   else:
     # Train
     train_fn(hparams, target_session=target_session)
