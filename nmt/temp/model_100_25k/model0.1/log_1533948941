@@ -1,0 +1,3 @@
+# log_file=./nmt/temp/model_100_25k/model0.1/log_1533948941
+# Start step 50000, lr 0.0001, Sat Aug 11 00:56:43 2018
+  step 50100 lr 0.0001 step-time 0.72s wps 33.77K ppl 1.65 gN 221.12 edit_distance 0.22, Sat Aug 11 00:57:56 2018
