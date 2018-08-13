@@ -158,20 +158,20 @@ def _hamming_distance(ref_file, predict_file):
         len_predict = len(predict_line)
         len_ref = len(ref_line)
 
-        if num_printed == int(0.05*num_lines):
-          print("More than 5% of the lines have length mismatch, suppress warning message")
-          num_printed += 1
-
+        #if num_printed == int(0.05*num_lines):
+          #print("More than 5% of the lines have length mismatch, suppress warning message")
+          #num_printed += 1
+        
         if len_predict > len_ref:
           predict_line = predict_line[:len_ref]
-          if num_printed < int(0.05*num_lines):
-            print("Network output longer than target on line #%d, truncating symbols past the target length" % line_number)
-            num_printed += 1
+          #if num_printed < int(0.05*num_lines):
+          #  print("Network output longer than target on line #%d, truncating symbols past the target length" % line_number)
+          #  num_printed += 1
         elif len_predict < len_ref:
           predict_line = predict_line + "1" * (len_ref - len_predict)
-          if num_printed < int(0.05*num_lines):
-            print("Network output shorter than target on line #%d, padding to target length with \'1\'" % line_number)
-            num_printed += 1
+          #if num_printed < int(0.05*num_lines):
+          #  print("Network output shorter than target on line #%d, padding to target length with \'1\'" % line_number)
+          #  num_printed += 1
 
         hdis += sum(predict_sym != ref_sym for (predict_sym, ref_sym) in zip(predict_line, ref_line)) / len_ref
     
