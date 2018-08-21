@@ -64,6 +64,17 @@ def add_arguments(parser):
                       help="Number of partitions for embedding vars.")
   parser.add_argument("--num_traces", type=int, default=1, 
                       help="Number of traces per traget sequence.")
+  parser.add_argument("--NEncoderMode", type=str, default="concat",
+                      help="""How the outputs of multiple encoders should be combined.\
+                      concat: simply concatenate the encoders' hidden states
+                      avg: average the encoders' hidden states\
+                      """)
+  parser.add_argument("--training_helper", type=str, default="tf",
+                      help=""""Choose the type of training helper used for decoder.\
+                      tf: teacher forcing
+                      se: scheduled embedding sampling
+                      so: scheduled output sampling
+                      """)
 
   # attention mechanisms
   parser.add_argument("--attention", type=str, default="", help="""\
@@ -325,6 +336,8 @@ def create_hparams(flags):
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
       num_traces = flags.num_traces,
+      NEncoderMode = flags.NEncoderMode,
+      training_helper = flags.training_helper,
 
 
       # Attention mechanisms
@@ -431,7 +444,12 @@ def extend_hparams(hparams):
     raise ValueError("subword option must be either spm, or bpe")
 
   if hparams.num_traces != 1:
-    hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+    if hparams.NEncoderMode == "concat":
+      hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+    elif hparams.NEncoderMode == "avg":
+      hparams.add_hparam("num_decoder_units", hparams.num_units)
+    else:
+      raise ValueError("Unknown NEncoderMode %s", hparams.NEncoderMode)
 
   # Flags
   utils.print_out("# hparams:")
