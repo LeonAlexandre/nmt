@@ -395,10 +395,32 @@ class BaseModel(object):
         decoder_emb_inp = tf.nn.embedding_lookup(
             self.embedding_decoder, target_input)
 
-        # Helper
-        helper = tf.contrib.seq2seq.TrainingHelper(
-            decoder_emb_inp, iterator.target_sequence_length,
-            time_major=self.time_major)
+        if hparams.training_helper == "tf":
+          # Teacher forcing helper
+          # Simply feeds in the ground truth to the decoder
+          helper = tf.contrib.seq2seq.TrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              time_major=self.time_major)
+          utils.print_out("# Using teacher forcing to train decoder.")
+        elif hparams.training_helper == "se":
+          # Scheduled embedding
+          # Takes previous network output logits, then samples from that distribution
+          helper = tf.contrib.seq2seq.ScheduledEmbeddingTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              embedding=self.embedding_decoder, 
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out("# Using scheduled embedding sampling to train decoder.")
+        elif hparams.training_helper == "so":
+          # Scheduled output
+          # Takes previous network output id, then feed it into the next decoding step
+          helper = tf.contrib.seq2seq.ScheduledOutputTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out("# Using scheduled output sampling to train decoder.")
+        else:
+          raise ValueError("Unknown decoder training helper: %s" % hparams.training_helper)
 
         # Decoder
         my_decoder = tf.contrib.seq2seq.BasicDecoder(
@@ -1009,29 +1031,58 @@ class ModelNt(BaseModel):
       encoder_outputs.append(enc_out)
       encoder_states.append(enc_state)
 
-    # Simply concatenate the outputs
-    # Each item in the outputs list has length equal to the sequence timestep
-    # Simple concat possible because of padding (see iterator_utils.get_iteratorNt padded_batch)
-    concat_outputs = encoder_outputs[0]
-    for i in range(1,hparams.num_traces):
-      concat_outputs = tf.concat([concat_outputs,encoder_outputs[i]],-1)
-
-    # Each item in the states list is a tuple containing multiple LSTMStateTuples
-    # The number of LSTMStateTuples is equal to the number of encoder layers
-    # c and h components of the LSTMStateTuple need to be concatenated, by layer, across encoders
-    layer_states = []
-
-    for layer in range(hparams.num_layers):
-      concat_c = encoder_states[0][layer][0]
-      concat_h = encoder_states[0][layer][1]
+    if hparams.NEncoderMode == "concat":
+      # Simply concatenate the outputs
+      # Each item in the outputs list has length equal to the sequence timestep
+      # Simple concat possible because of padding (see iterator_utils.get_iteratorNt padded_batch)
+      concat_outputs = encoder_outputs[0]
       for i in range(1,hparams.num_traces):
-        concat_c = tf.concat([concat_c,encoder_states[i][layer][0]],-1)
-        concat_h = tf.concat([concat_h,encoder_states[i][layer][1]],-1)
-      layer_states.append(tf.nn.rnn_cell.LSTMStateTuple(concat_c,concat_h))
+        concat_outputs = tf.concat([concat_outputs,encoder_outputs[i]],-1)
 
-    encoder_state = tuple(layer_states)
+      # Each item in the states list is a tuple containing multiple LSTMStateTuples
+      # The number of LSTMStateTuples is equal to the number of encoder layers
+      # c and h components of the LSTMStateTuple need to be concatenated, by layer, across encoders
+      layer_states = []
 
-    return concat_outputs, encoder_state
+      for layer in range(hparams.num_layers):
+        concat_c = encoder_states[0][layer][0]
+        concat_h = encoder_states[0][layer][1]
+        for i in range(1,hparams.num_traces):
+          concat_c = tf.concat([concat_c,encoder_states[i][layer][0]],-1)
+          concat_h = tf.concat([concat_h,encoder_states[i][layer][1]],-1)
+        layer_states.append(tf.nn.rnn_cell.LSTMStateTuple(concat_c,concat_h))
+
+      encoder_outputs = concat_outputs
+      encoder_state = tuple(layer_states)
+
+    elif hparams.NEncoderMode == "avg":
+      # Average the hidden states from different encoders
+      # First sum all hidden outputs elementwise
+      sum_outputs = encoder_outputs[0]
+      for i in range(1,hparams.num_traces):
+        sum_outputs = tf.add(sum_outputs,enc_out)
+      # Average by the number of traces
+      avg_outputs = tf.divide(sum_outputs,hparams.num_traces)
+
+      # Each item in the states list is a tuple containing multiple LSTMStateTuples
+      # The number of LSTMStateTuples is equal to the number of encoder layers
+      # c and h components of the LSTMStateTuple need to be average, by layer, across encoders
+      layer_states = []
+
+      for layer in range(hparams.num_layers):
+        sum_c = encoder_states[0][layer][0]
+        sum_h = encoder_states[0][layer][1]
+        for i in range(1,hparams.num_traces):
+          sum_c = tf.add(sum_c,encoder_states[i][layer][0])
+          sum_h = tf.add(sum_h,encoder_states[i][layer][1])
+        avg_c = tf.divide(sum_c,hparams.num_traces)
+        avg_h = tf.divide(sum_h,hparams.num_traces)
+        layer_states.append(tf.nn.rnn_cell.LSTMStateTuple(avg_c,avg_h))
+
+      encoder_outputs = avg_outputs
+      encoder_state = tuple(layer_states)
+
+    return encoder_outputs, encoder_state
 
 
 ###############################################################################################
@@ -1075,10 +1126,32 @@ class ModelNt(BaseModel):
         decoder_emb_inp = tf.nn.embedding_lookup(
             self.embedding_decoder, target_input)
 
-        # Helper
-        helper = tf.contrib.seq2seq.TrainingHelper(
-            decoder_emb_inp, iterator.target_sequence_length,
-            time_major=self.time_major)
+        if hparams.training_helper == "tf":
+          # Teacher forcing helper
+          # Simply feeds in the ground truth to the decoder
+          helper = tf.contrib.seq2seq.TrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              time_major=self.time_major)
+          utils.print_out(" Using teacher forcing to train decoder.")
+        elif hparams.training_helper == "se":
+          # Scheduled embedding
+          # Takes previous network output logits, then samples from that distribution
+          helper = tf.contrib.seq2seq.ScheduledEmbeddingTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              embedding=self.embedding_decoder, 
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out(" Using scheduled embedding sampling to train decoder.")
+        elif hparams.training_helper == "so":
+          # Scheduled output
+          # Takes previous network output id, then feed it into the next decoding step
+          helper = tf.contrib.seq2seq.ScheduledOutputTrainingHelper(
+              decoder_emb_inp, iterator.target_sequence_length,
+              sampling_probability=0.5, 
+              time_major=self.time_major)
+          utils.print_out(" Using scheduled output sampling to train decoder.")
+        else:
+          raise ValueError("Unknown decoder training helper: %s" % hparams.training_helper)
 
         # Decoder
         my_decoder = tf.contrib.seq2seq.BasicDecoder(
