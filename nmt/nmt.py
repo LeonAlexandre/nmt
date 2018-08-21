@@ -64,6 +64,17 @@ def add_arguments(parser):
                       help="Number of partitions for embedding vars.")
   parser.add_argument("--num_traces", type=int, default=1, 
                       help="Number of traces per traget sequence.")
+  parser.add_argument("--NEncoderMode", type=str, default="concat",
+                      help="""How the outputs of multiple encoders should be combined.\
+                      concat: simply concatenate the encoders' hidden states
+                      avg: average the encoders' hidden states\
+                      """)
+  parser.add_argument("--training_helper", type=str, default="tf",
+                      help=""""Choose the type of training helper used for decoder.\
+                      tf: teacher forcing
+                      se: scheduled embedding sampling
+                      so: scheduled output sampling
+                      """)
 
   # attention mechanisms
   parser.add_argument("--attention", type=str, default="", help="""\
@@ -242,7 +253,7 @@ def add_arguments(parser):
   parser.add_argument("--override_loaded_hparams", type="bool", nargs="?",
                       const=True, default=False,
                       help="Override loaded hparams with values specified")
-  parser.add_argument("--num_keep_ckpts", type=int, default=1,
+  parser.add_argument("--num_keep_ckpts", type=int, default=3,
                       help="Max number of checkpoints to keep.")
   parser.add_argument("--avg_ckpts", type="bool", nargs="?",
                       const=True, default=False, help=("""\
@@ -325,6 +336,8 @@ def create_hparams(flags):
       time_major=flags.time_major,
       num_embeddings_partitions=flags.num_embeddings_partitions,
       num_traces = flags.num_traces,
+      NEncoderMode = flags.NEncoderMode,
+      training_helper = flags.training_helper,
 
 
       # Attention mechanisms
@@ -431,7 +444,12 @@ def extend_hparams(hparams):
     raise ValueError("subword option must be either spm, or bpe")
 
   if hparams.num_traces != 1:
-    hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+    if hparams.NEncoderMode == "concat":
+      hparams.add_hparam("num_decoder_units", hparams.num_units*hparams.num_traces)
+    elif hparams.NEncoderMode == "avg":
+      hparams.add_hparam("num_decoder_units", hparams.num_units)
+    else:
+      raise ValueError("Unknown NEncoderMode %s", hparams.NEncoderMode)
 
   # Flags
   utils.print_out("# hparams:")
@@ -546,9 +564,10 @@ def ensure_compatible_hparams(hparams, default_hparams, hparams_path):
   return hparams
 
 
-def create_or_load_hparams(
+def create_or_load_hparams(flags,
     out_dir, default_hparams, hparams_path, save_hparams=True):
   """Create hparams or load hparams from out_dir."""
+  metrics = default_hparams.metrics
   hparams = utils.load_hparams(out_dir)
   if not hparams:
     hparams = default_hparams
@@ -558,11 +577,20 @@ def create_or_load_hparams(
   else:
     hparams = ensure_compatible_hparams(hparams, default_hparams, hparams_path)
 
+  hparams.metrics = metrics
+
   # Save HParams
   if save_hparams:
     utils.save_hparams(out_dir, hparams)
     for metric in hparams.metrics:
-      utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      try: 
+        utils.save_hparams(getattr(hparams, "best_" + metric + "_dir"), hparams)
+      except AttributeError:
+        if flags.inference_input_file != None:
+          pass
+        else:
+          sys.exit("Can not find best_%s_dir" % metric)
+
 
   # Print HParams
   utils.print_hparams(hparams)
@@ -589,7 +617,7 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
   if not tf.gfile.Exists(out_dir): tf.gfile.MakeDirs(out_dir)
 
   # Load hparams.
-  hparams = create_or_load_hparams(
+  hparams = create_or_load_hparams(flags, 
       out_dir, default_hparams, flags.hparams_path, save_hparams=(jobid == 0))
 
   if flags.inference_input_file:
@@ -615,10 +643,9 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             ref_file,
             trans_file,
             metric,
-            hparams.subword_option)
-        if metric == "edit_distance" or metric == "hamming_distance":
-          score = -1*score
-        utils.print_out("  %s: %.1f" % (metric, score))
+            hparams.subword_option,
+            flags.inference_input_file)
+        utils.print_out("  %s: %.2f" % (metric, np.abs(score)))
         
   elif flags.inference_input_prefix:
     hparams.inference_indices = None
