@@ -609,8 +609,8 @@ def _sample_decode(model, global_step, sess, hparams, iterator, src_data, tgt_da
   else:
     for i in range(hparams.num_traces):
       utils.print_out("    trace%d: %s" % (i,trace_decode_data[i][0]))
-  utils.print_out("    ref: %s" % tgt_data[decode_id])
-  utils.print_out(b"    nmt: " + translation)
+  utils.print_out("    ref:    %s" % tgt_data[decode_id])
+  utils.print_out(b"    nmt:    " + translation)
 
   # Summary
   if attention_summary is not None:
