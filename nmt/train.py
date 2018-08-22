@@ -267,7 +267,7 @@ def update_stats(stats, start_time, step_result):
 def print_step_info(prefix, global_step, info, result_summary, log_f):
   """Print all info at the current global step."""
   utils.print_out(
-      "%sstep %d lr %g step-time %.2fs wps %.2fK ppl %.2f gN %.2f %s, %s" %
+      "%sstep %d lr %g step-time %.2fs wps %.2fK ppl %.3f gN %.2f %s, %s" %
       (prefix, global_step, info["learning_rate"], info["avg_step_time"],
        info["speed"], info["train_ppl"], info["avg_grad_norm"], result_summary,
        time.ctime()),
@@ -530,13 +530,13 @@ def _format_results(name, ppl, scores, metrics):
   """Format results."""
   result_str = ""
   if ppl:
-    result_str = "%s ppl %.2f" % (name, ppl)
+    result_str = "%s ppl %.3f" % (name, ppl)
   if scores:
     for metric in metrics:
       if result_str:
-        result_str += ", %s %s %.1f" % (name, metric, np.abs(scores[metric]))
+        result_str += ", %s %s %.3f" % (name, metric, np.abs(scores[metric]))
       else:
-        result_str = "%s %s %.1f" % (name, metric, np.abs(scores[metric]))
+        result_str = "%s %s %.3f" % (name, metric, np.abs(scores[metric]))
   return result_str
 
 
@@ -544,7 +544,7 @@ def _get_best_results(hparams):
   """Summary of the current best results."""
   tokens = []
   for metric in hparams.metrics:
-    tokens.append("%s %.2f" % (metric, np.abs(getattr(hparams, "best_" + metric))))
+    tokens.append("%s %.3f" % (metric, np.abs(getattr(hparams, "best_" + metric))))
   return ", ".join(tokens)
 
 
